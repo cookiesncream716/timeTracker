@@ -21,6 +21,7 @@ registerPlugin(proto(Gem, function(){
 			defaultDate: new Date()
 		})
 		this.add(this.checkIn)
+
 		// var that = this
 		// this.ticket = ticket
 
@@ -33,6 +34,7 @@ registerPlugin(proto(Gem, function(){
 		// 	that.currentUser = user.subject._id
 		// }).done()
 
+		// // Check-In Time
 		// this.checkIn = TextField()
 		// this.min
 		// if(ticket.get(inProperty).subject === undefined){
@@ -60,6 +62,8 @@ registerPlugin(proto(Gem, function(){
 		// 		}
 		// 	})
 		// }
+
+		// // Check-Out Time
 		// var errMessage = Text('error', 'x')
 		// errMessage.visible = false
 		// this.checkOut = TextField()
@@ -84,7 +88,6 @@ registerPlugin(proto(Gem, function(){
 
 		// this.workedText = Text()
 		// this.workedText.visible = false
-
 		// var box = Text('div', 'Keep track of the time you are working.')
 		// var box2 = Block('div', Text('Start Time: '), this.checkIn, Text(' End Time: '), this.checkOut, errMessage, this.workedText)
 		// box.visible = false
@@ -92,18 +95,20 @@ registerPlugin(proto(Gem, function(){
 
 		// var button = Button('timeTracker')
 		// this.add(button, box, box2)
-
 		// button.on('click', function(){
 		// 	box.visible = true
 		// 	box2.visible = true
 		// 	// does button need hidden?
 		// })
 
+		// // convert check-in time to milliseconds and save it
 		// this.setIn = function(){
 		// 	var ms = this.checkIn.val
 		// 	this.mIn = new Date(ms).getTime()
 		// 	this.ticket.set('checkIn', this.checkIn.val)
 		// }
+
+		// // find how long worked and save out/time worked/user
 		// this.calculateTime = function(){
 		// 	var diff = this.mOut - this.mIn
 		// 	var hours = Math.floor(diff/1000/60/60)
@@ -116,6 +121,7 @@ registerPlugin(proto(Gem, function(){
 		// 	this.ticket.set('timeWorked', diff)
 		// 	this.ticket.set('user', this.currentUser)
 		// }
+
 		// this.getStyle = function(){
 		// 	return Style({
 		// 		$div: {
