@@ -15,7 +15,8 @@
 			this.ticket = ticket
 			optionsObservee = {subject:optionsObservee} // todo: remove this when Tixit is deployed next
 			var inProperty = optionsObservee.subject.checkInField
-			var start = ticket.subject[inProperty]
+			// var start = ticket.subject[inProperty]
+			// var start = ticket.get(inProperty).subject
 			api.User.current().then(function(user){
 				that.currUser = user.subject._id
 			}).done()
@@ -23,7 +24,7 @@
 
 			this.checkIn = Gem.TextField()
 			this.mIn
-			if(start == undefined){
+			if(ticket.get(inProperty).subject === undefined){
 				this.checkIn.val = new Date()
 				// this.mIn = new Date(this.checkIn.val).getTime()
 				// ticket.set('checkIn', this.checkIn.val)
@@ -42,7 +43,7 @@
 					}
 				})
 			} else{
-				this.checkIn.val = start
+				this.checkIn.val = ticket.get(inProperty).subject
 				// this.mIn = new Date(start).getTime()
 				// ticket.set('checkIn', this.checkIn.val)
 				this.setIn()
@@ -132,8 +133,7 @@
 
 	})
 	ExtensionTester.Api.Ticket.create().then(function(newOne){
-		newOne.subject.checkIn = new Date(2017, 7, 16, 5, 30)
-		// probably userField should be added - it would be person logged in I guess - person working on the ticket wouldn't have to be the assignee
+		// newOne.subject.checkIn = new Date(2017, 7, 16, 5, 30)
 		ExtensionTester(TimeTracker, {checkInField: 'checkIn', checkOutField: 'checkOut', timeWorked: 'timeWorked', userField: 'user'}, {ticketId: newOne.subject._id, showEditor: true})
 	}).done()
 </script>
