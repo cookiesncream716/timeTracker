@@ -50,7 +50,7 @@
 				var fp_in = new flatpickr(this.checkIn.domNode, {
 					enableTime: true,
 					dateFormat: 'm-d-Y h:i K',
-					defaultDate: start,
+					defaultDate: ticket.get(inProperty).subject,
 					minuteIncrement: 1,
 					onClose: function(){
 						// var x = that.checkIn.val
