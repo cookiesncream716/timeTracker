@@ -134,6 +134,6 @@
 	})
 	ExtensionTester.Api.Ticket.create().then(function(newOne){
 		// newOne.subject.checkIn = new Date(2017, 7, 16, 5, 30)
-		ExtensionTester(TimeTracker, {checkInField: 'checkIn', checkOutField: 'checkOut', timeWorked: 'timeWorked', userField: 'user'}, {ticketId: newOne.subject._id, showEditor: true})
+		ExtensionTester(TimeTracker, {checkInField: 'checkIn', checkOutField: 'checkOut', timeWorkedField: 'timeWorked', userField: 'user'}, {ticketId: newOne.subject._id, showEditor: true})
 	}).done()
 </script>

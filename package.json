@@ -6,6 +6,7 @@
 		"build-modules": "^2.1.0",
 		"flatpickr": "^3.0.6",
 		"gem": "^2.4.2",
-		"proto": "^1.0.19"
+		"proto": "^1.0.19",
+		"raw-loader": "^0.5.1"
 	}
 }
