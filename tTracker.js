@@ -25,6 +25,7 @@ registerPlugin(proto(Gem, function(){
 	this.build = function(ticket, optionsObservee, api){
 		var that = this
 		this.ticket = ticket
+		// ticket.set('checkIn', new Date)
 
 		// get access if there is already a check-in time
 		var inProperty = optionsObservee.subject.checkInField
@@ -94,18 +95,28 @@ registerPlugin(proto(Gem, function(){
 
 		this.workedText = Text()
 		this.workedText.visible = false
-		var box = Text('div', 'Keep track of the time you are working.')
+		// var box = Text('div', 'Keep track of the time you are working.')
 		var box2 = Block('div', Text('Start Time: '), this.checkIn, Text(' End Time: '), this.checkOut, errMessage, this.workedText)
 		// box.visible = false
-		// box2.visible = false
-		this.add(box, box2)
-		// var button = Button('timeTracker')
+		box2.visible = false
+		// this.add(box, box2)
+		var button = Button('timeTracker')
+		var button2 = Button('close')
+		button2.visible = false
 		// this.add(button, box, box2)
-		// button.on('click', function(){
-		// 	box.visible = true
-		// 	box2.visible = true
-		// 	// does button need hidden?
-		// })
+		this.add(button, button2, box2)
+		button.on('click', function(){
+			// box.visible = true
+			box2.visible = true
+			// does button need hidden?
+			button.visible = false
+			button2.visible = true
+		})
+		button2.on('click', function(){
+			box2.visible = false
+			button.visible = true
+			button2.visible = false
+		})
 
 		// css stylesheet for flatpickr
 		this.on('attach', function(){
