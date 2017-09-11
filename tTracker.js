@@ -1,13 +1,13 @@
-var proto = require('proto')
-var Gem = require('gem')
+// var proto = require('proto')
+// var Gem = require('gem')
 var flatpickr = require('flatpickr')
 
 // not sure these are necessare - they might already be available
-var TextField = require('gem/TextField')
-var Text = require('gem/Text')
-var Block = require('gem/Block')
-var Button = require('gem/Button')
-var Style = require('gem/Style')
+// var TextField = require('gem/TextField')
+// var Text = require('gem/Text')
+// var Block = require('gem/Block')
+// var Button = require('gem/Button')
+// var Style = require('gem/Style')
 
 registerPlugin(proto(Gem, function(){
 	this.name = 'TimeTracker'
@@ -18,7 +18,7 @@ registerPlugin(proto(Gem, function(){
 	// 		checkInField: 'checkIn',
 	// 		checkOutField: 'checkOut',
 	// 		timeWorkedField: 'timeWorked',
-	// 		userField: 'user
+	// 		userField: 'user'
 	// 	}
 	// }
 
@@ -29,36 +29,32 @@ registerPlugin(proto(Gem, function(){
 		// get access if there is already a check-in time
 		var inProperty = optionsObservee.subject.checkInField
 		// var inProperty = optionsObservee.checkInField
-		// var start = ticket.get(inProperty).subject
+		console.log('in = ' + ticket.get(inProperty).subject)
 
 		// get the current user
 		api.User.current().then(function(user){
 			that.currentUser = user.subject._id
-			console.log('user=' + that.currentUser)
+			console.log('user = ' + that.currentUser)
 		}).done()
-
-		// Testing options
-		console.log('inProperty' + ticket.get(inProperty).subject)
-		console.log('out=' + ticket.get(optionsObservee.subject.checkOutField).subject)
-		this.ticket.set('user', this.currentUser)
-		console.log('user=' + ticket.get(optionsObservee.subject.userField).subject)
-		console.log('worked=' + ticket.get(optionsObservee.subject.timeWorkedField).subject)
 
 		// Check-In Time
 		this.checkIn = TextField()
 		if(ticket.get(inProperty).subject === undefined){
-			this.checkIn.val = new Date()
-			this.setIn()
+			// var now = new Date()
+			// console.log('now = ' + (now.getMonth()+1) + '-' + now.getDate() + '-' + now.getFullYear() + ' ' + now.toLocaleTimeString())
+			// this.checkIn.val = (now.getMonth()+1) + '-' + now.getDate() + '-' + now.getFullYear() + ' ' + now.toLocaleTimeString()
+			// this.setIn()
 			var fp_in = new flatpickr(this.checkIn.domNode, {
 				enableTime: true,
 				dateFormat: 'm-d-Y h:i K',
-				defaultDate: new Date(),
 				minuteIncrement: 1,
+				maxDate: 'today',
 				onClose: function(){
 					that.setIn()
 				}
 			})
 		} else{
+			console.log('set to '+ ticket.get(inProperty).subject)
 			this.checkIn.val = ticket.get(inProperty).subject
 			this.setIn()
 			var fp_in = new flatpickr(this.checkIn.domNode, {
@@ -66,13 +62,14 @@ registerPlugin(proto(Gem, function(){
 				dateFormat: 'm-d-Y h:i K',
 				defaultDate: ticket.get(inProperty).subject,
 				minuteIncrement: 1,
+				// maxDate: 'today',
 				onClose: function(){
 					that.setIn()
 				}
 			})
 		}
 
-		// // Check-Out Time
+		// Check-Out Time
 		var errMessage = Text('error', 'x')
 		errMessage.visible = false
 		this.checkOut = TextField()
@@ -110,7 +107,7 @@ registerPlugin(proto(Gem, function(){
 		// 	// does button need hidden?
 		// })
 
-		// css for flatpickr
+		// css stylesheet for flatpickr
 		this.on('attach', function(){
 		var flatpickrStylesheet = require('raw-loader!flatpickr/dist/flatpickr.min.css')
 		var style = document.createElement('style')
@@ -123,12 +120,13 @@ registerPlugin(proto(Gem, function(){
 	this.setIn = function(){
 		var ms = this.checkIn.val
 		this.mIn = new Date(ms).getTime()
-		this.ticket.set('checkIn', this.checkIn.val)
+		this.ticket.set('checkIn', new Date(this.checkIn.val))
 		console.log('mIn=' + this.mIn)
 		console.log(this.checkIn.val)
+		console.log(new Date(this.checkIn.val))
 	}
 
-	// // find how long worked and save out/time worked/user
+	// find how long worked and save out/time worked/user
 	this.calculateTime = function(){
 		var diff = this.mOut - this.mIn
 		var hours = Math.floor(diff/1000/60/60)
@@ -136,14 +134,12 @@ registerPlugin(proto(Gem, function(){
 		var minutes = Math.floor(diff/1000/60)
 		this.workedText.text = 'You worked ' + hours + ' hours and ' + minutes + ' minutes.'
 		this.workedText.visible = true
-		this.ticket.set('checkOut', this.checkOut.val)
+		this.ticket.set('checkOut', new Date(this.checkOut.val))
 		// timeWorked is in milliseconds so need to do math to convert to hours/minutes when displayed
 		this.ticket.set('timeWorked', diff)
 		this.ticket.set('user', this.currentUser)
-		console.log('in=' + ticket.get(inProperty).subject)
-		console.log('out=' + ticket.get(optionsObservee.subject.checkOutField).subject)
-		console.log('user=' + ticket.get(optionsObservee.subject.userField).subject)
-		console.log('worked=' + ticket.get(optionsObservee.subject.timeWorkedField).subject)
+		this.checkIn.val = ''
+		this.checkOut.val = ''
 	}
 	this.getStyle = function(){
 		return Style({

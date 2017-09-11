@@ -6,6 +6,9 @@
 	<script src="https://tixit.me/PluginTester.umd.js"></script>
 	<script src="tTracker.umd.js"></script>
 	<script>
-   	 	PluginTester('TimeTracker', {checkInField: 'checkIn', checkOutField: 'checkOut', timeWorkedField: 'timeWorked', userField: 'user'}, {showEditor: true})
-	</script>
+		PluginTester.Api.Ticket.create().then(function(testTicket){
+			// testTicket.subject.checkIn = new Date(2017, 8, 4, 10, 30)
+			PluginTester('TimeTracker', {checkInField: 'checkIn', checkOutField: 'checkOut', timeWorkedField: 'timeWorked', userField: 'user'}, {ticketId: testTicket.subject._id, showEditor: true})
+		}).done()
+   	</script>
 </html>
