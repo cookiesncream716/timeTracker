@@ -1,6 +1,6 @@
 {
 	"name": "TimeTracker",
-	"description": "plugin tutorial",
+	"description": "plugin for Tixit to keep track of time worked on a ticket",
 	"dependencies": {
 		"browserify": "^14.4.0",
 		"build-modules": "^2.1.0",

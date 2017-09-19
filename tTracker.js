@@ -73,6 +73,8 @@ registerPlugin(proto(Gem, function(){
 		// Check-Out Time
 		var errMessage = Text('error', 'x')
 		errMessage.visible = false
+		this.workedText = Text()
+		this.workedText.visible = false
 		this.checkOut = TextField()
 		var fp_out = new flatpickr(this.checkOut.domNode, {
 			enableTime: true,
@@ -89,12 +91,18 @@ registerPlugin(proto(Gem, function(){
 				} else{
 					errMessage.visible = false
 					that.calculateTime()
+					// setTimeout(that.workedText.visible = true, 1000)
+					// that.workedText.visible = false
+					setTimeout(function(){
+						that.workedText.visible = true, 500
+					})
+					that.workedText.visible = false
 				}
 			}
 		})
 
-		this.workedText = Text()
-		this.workedText.visible = false
+		// this.workedText = Text()
+		// this.workedText.visible = false
 		// var box = Text('div', 'Keep track of the time you are working.')
 		var box2 = Block('div', Text('Start Time: '), this.checkIn, Text(' End Time: '), this.checkOut, errMessage, this.workedText)
 		// box.visible = false
@@ -108,7 +116,6 @@ registerPlugin(proto(Gem, function(){
 		button.on('click', function(){
 			// box.visible = true
 			box2.visible = true
-			// does button need hidden?
 			button.visible = false
 			button2.visible = true
 		})
@@ -139,12 +146,16 @@ registerPlugin(proto(Gem, function(){
 
 	// find how long worked and save out/time worked/user
 	this.calculateTime = function(){
+		// var that = this
 		var diff = this.mOut - this.mIn
 		var hours = Math.floor(diff/1000/60/60)
 		diff -= hours*1000*60*60
 		var minutes = Math.floor(diff/1000/60)
 		this.workedText.text = 'You worked ' + hours + ' hours and ' + minutes + ' minutes.'
-		this.workedText.visible = true
+		// this.workedText.visible = true
+		// setTimeout(function(){
+		// 	that.workedText.visible = true
+		// }, 3000)
 		this.ticket.set('checkOut', new Date(this.checkOut.val))
 		// timeWorked is in milliseconds so need to do math to convert to hours/minutes when displayed
 		this.ticket.set('timeWorked', diff)

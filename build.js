@@ -1,6 +1,6 @@
 var build = require('build-modules')
 // var emitter = build(__dirname+'/rootDirectory/moduleName', {output:{path: __dirname+'/generatedFile/'}})
-var emitter = build(__dirname + '/tTracker.js', {output: {path: __dirname}})
+var emitter = build(__dirname + '/tTracker.js', {output: {path: __dirname, minify:false}})
 emitter.on('done', function() {
    console.log("Done!")
 })
