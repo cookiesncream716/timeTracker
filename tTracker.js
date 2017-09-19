@@ -3,15 +3,15 @@ var flatpickr = require('flatpickr')
 registerPlugin(proto(Gem, function(){
 	this.name = 'TimeTracker'
 
-	// set ticket field options
-	// this.initialize = function(options){
-	// 	return{
-	// 		checkInField: 'checkIn',
-	// 		checkOutField: 'checkOut',
-	// 		timeWorkedField: 'timeWorked',
-	// 		userField: 'user'
-	// 	}
-	// }
+	// set ticket field options 
+	this.initialize = function(options){
+		return{
+			checkInField: 'checkIn',
+			checkOutField: 'checkOut',
+			timeWorkedField: 'timeWorked',
+			userField: 'user'
+		}
+	}
 
 	this.build = function(ticket, optionsObservee, api){
 		var that = this
