@@ -1,13 +1,4 @@
-// var proto = require('proto')
-// var Gem = require('gem')
 var flatpickr = require('flatpickr')
-
-// not sure these are necessare - they might already be available
-// var TextField = require('gem/TextField')
-// var Text = require('gem/Text')
-// var Block = require('gem/Block')
-// var Button = require('gem/Button')
-// var Style = require('gem/Style')
 
 registerPlugin(proto(Gem, function(){
 	this.name = 'TimeTracker'
@@ -25,12 +16,9 @@ registerPlugin(proto(Gem, function(){
 	this.build = function(ticket, optionsObservee, api){
 		var that = this
 		this.ticket = ticket
-		// ticket.set('checkIn', new Date)
 
 		// get access if there is already a check-in time
 		var inProperty = optionsObservee.subject.checkInField
-		// var inProperty = optionsObservee.checkInField
-		console.log('in = ' + ticket.get(inProperty).subject)
 
 		// get the current user
 		api.User.current().then(function(user){
@@ -41,10 +29,6 @@ registerPlugin(proto(Gem, function(){
 		// Check-In Time
 		this.checkIn = TextField()
 		if(ticket.get(inProperty).subject === undefined){
-			// var now = new Date()
-			// console.log('now = ' + (now.getMonth()+1) + '-' + now.getDate() + '-' + now.getFullYear() + ' ' + now.toLocaleTimeString())
-			// this.checkIn.val = (now.getMonth()+1) + '-' + now.getDate() + '-' + now.getFullYear() + ' ' + now.toLocaleTimeString()
-			// this.setIn()
 			var fp_in = new flatpickr(this.checkIn.domNode, {
 				enableTime: true,
 				dateFormat: 'm-d-Y h:i K',
@@ -101,29 +85,24 @@ registerPlugin(proto(Gem, function(){
 			}
 		})
 
-		// this.workedText = Text()
-		// this.workedText.visible = false
-		// var box = Text('div', 'Keep track of the time you are working.')
-		var box2 = Block('div', Text('Start Time: '), this.checkIn, Text(' End Time: '), this.checkOut, errMessage, this.workedText)
-		// box.visible = false
-		box2.visible = false
-		// this.add(box, box2)
-		var button = Button('timeTracker')
-		var button2 = Button('close')
-		button2.visible = false
-		// this.add(button, box, box2)
-		this.add(button, button2, box2)
-		button.on('click', function(){
-			// box.visible = true
-			box2.visible = true
-			button.visible = false
-			button2.visible = true
-		})
-		button2.on('click', function(){
-			box2.visible = false
-			button.visible = true
-			button2.visible = false
-		})
+		var box = Block('div', Text('Start Time: '), this.checkIn, Text(' End Time: '), this.checkOut, errMessage, this.workedText)
+	// Don't think the buttons are needed on actual Tixit site
+		// var button = Button('timeTracker')
+		// var button2 = Button('close')
+		// button2.visible = false
+		// this.add(button, button2, box)
+		this.add(box)
+		// button.on('click', function(){
+		// 	// box.visible = true
+		// 	box2.visible = true
+		// 	button.visible = false
+		// 	button2.visible = true
+		// })
+		// button2.on('click', function(){
+		// 	box2.visible = false
+		// 	button.visible = true
+		// 	button2.visible = false
+		// })
 
 		// css stylesheet for flatpickr
 		this.on('attach', function(){
