@@ -77,10 +77,10 @@ registerPlugin(proto(Gem, function(){
 					that.calculateTime()
 					// setTimeout(that.workedText.visible = true, 1000)
 					// that.workedText.visible = false
-					setTimeout(function(){
-						that.workedText.visible = true, 500
-					})
-					that.workedText.visible = false
+					// setTimeout(function(){
+					// 	that.workedText.visible = true, 500
+					// })
+					// that.workedText.visible = false
 				}
 			}
 		})
@@ -131,7 +131,7 @@ registerPlugin(proto(Gem, function(){
 		diff -= hours*1000*60*60
 		var minutes = Math.floor(diff/1000/60)
 		this.workedText.text = 'You worked ' + hours + ' hours and ' + minutes + ' minutes.'
-		// this.workedText.visible = true
+		this.workedText.visible = true
 		// setTimeout(function(){
 		// 	that.workedText.visible = true
 		// }, 3000)
