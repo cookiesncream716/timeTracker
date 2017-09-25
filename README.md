@@ -1,4 +1,4 @@
-#Tixit: timeTracker
+# Tixit: timeTracker
 This is a plugin for [Tixit](https://tixit.me/) which allows users to record the time they have spent working on a ticket.
 
 ### License
