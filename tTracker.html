@@ -7,7 +7,7 @@
 	<script src="tTracker.umd.js"></script>
 	<script>
 		PluginTester.Api.Ticket.create().then(function(testTicket){
-			testTicket.subject.checkIn = new Date(2017, 8, 4, 10, 30)
+			// testTicket.subject.checkIn = new Date(2017, 8, 4, 10, 30)
 			PluginTester('TimeTracker', {checkInField: 'checkIn', checkOutField: 'checkOut', timeWorkedField: 'timeWorked', userField: 'user'}, {ticketId: testTicket.subject._id, showEditor: true})
 		}).done()
    	</script>

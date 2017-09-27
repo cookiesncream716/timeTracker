@@ -113,34 +113,11 @@ registerPlugin(proto(Gem, function(){
 		var box = Block('div', Text('Start Time: '), this.checkIn, Text(' End Time: '), this.checkOut, errMessage, this.workedText)
 		this.add(box)
 
-		// get access if there is already a check-in time
+		// get access to check-in time on ticket
 		var inProperty = optionsObservee.subject.checkInField
 		this.getIn = ticket.get(inProperty)
 
 		// Check-In Time
-		// if(this.getIn.subject === undefined){
-		// 	var fp_in = new flatpickr(this.checkIn.domNode, {
-		// 		enableTime: true,
-		// 		dateFormat: 'm-d-Y h:i K',
-		// 		minuteIncrement: 1,
-		// 		maxDate: 'today',
-		// 		onClose: function(){
-		// 			that.setIn()
-		// 		}
-		// 	})
-		// } else{
-		// 	var fp_in = new flatpickr(this.checkIn.domNode, {
-		// 		enableTime: true,
-		// 		dateFormat: 'm-d-Y h:i K',
-		// 		defaultDate: this.getIn.subject,
-		// 		minuteIncrement: 1,
-		// 		maxDate: 'today',
-		// 		onClose: function(){
-		// 			that.setIn()
-		// 		}
-		// 	})
-		// }
-
 		var fp_options = {
 			enableTime: true,
 			dateFormat: 'm-d-Y h:i K',
@@ -151,13 +128,6 @@ registerPlugin(proto(Gem, function(){
 				that.setIn()
 			}
 		}
-		// var fpOptions = fp_options.defaultDate = this.getIn.subject
-		console.log('fp_options = ')
-		console.log(fp_options)
-		// fp_options.defaultDate = this.getIn.subject
-		// console.log('fp_options+ = ')
-		// console.log(fpOptions)
-
 		if(this.getIn.subject === undefined){
 			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
 		} else{
@@ -194,7 +164,6 @@ registerPlugin(proto(Gem, function(){
 
 	// convert check-in time to milliseconds and save it
 	this.setIn = function(){
-		console.log('setIn')
 		this.ticket.set(this.optionsObservee.subject.checkInField, new Date(this.checkIn.val))
 	}
 
@@ -207,9 +176,9 @@ registerPlugin(proto(Gem, function(){
 		var minutes = Math.floor(rTime/1000/60)
 		this.workedText.text = 'You worked ' + hours + ' hours and ' + minutes + ' minutes.'
 		this.workedText.visible = true
-		// setTimeout(function(){
-		// 	that.workedText.visible = true
-		// }, 3000)
+		setTimeout(function(){
+			that.workedText.visible = false
+		}, 5000)
 		this.ticket.set(this.optionsObservee.subject.checkOutField, new Date(this.checkOut.val))
 		// timeWorked is in milliseconds so need to do math to convert to hours/minutes when displayed
 		this.ticket.set(this.optionsObservee.subject.timeWorkedField, tWorked)
