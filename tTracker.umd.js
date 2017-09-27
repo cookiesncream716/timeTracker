@@ -118,27 +118,51 @@ registerPlugin(proto(Gem, function(){
 		this.getIn = ticket.get(inProperty)
 
 		// Check-In Time
+		// if(this.getIn.subject === undefined){
+		// 	var fp_in = new flatpickr(this.checkIn.domNode, {
+		// 		enableTime: true,
+		// 		dateFormat: 'm-d-Y h:i K',
+		// 		minuteIncrement: 1,
+		// 		maxDate: 'today',
+		// 		onClose: function(){
+		// 			that.setIn()
+		// 		}
+		// 	})
+		// } else{
+		// 	var fp_in = new flatpickr(this.checkIn.domNode, {
+		// 		enableTime: true,
+		// 		dateFormat: 'm-d-Y h:i K',
+		// 		defaultDate: this.getIn.subject,
+		// 		minuteIncrement: 1,
+		// 		maxDate: 'today',
+		// 		onClose: function(){
+		// 			that.setIn()
+		// 		}
+		// 	})
+		// }
+
+		var fp_options = {
+			enableTime: true,
+			dateFormat: 'm-d-Y h:i K',
+			minuteIncrement: 1,
+			maxDate: 'today',
+			defaultDate: null,
+			onClose: function(){
+				that.setIn()
+			}
+		}
+		// var fpOptions = fp_options.defaultDate = this.getIn.subject
+		console.log('fp_options = ')
+		console.log(fp_options)
+		// fp_options.defaultDate = this.getIn.subject
+		// console.log('fp_options+ = ')
+		// console.log(fpOptions)
+
 		if(this.getIn.subject === undefined){
-			var fp_in = new flatpickr(this.checkIn.domNode, {
-				enableTime: true,
-				dateFormat: 'm-d-Y h:i K',
-				minuteIncrement: 1,
-				maxDate: 'today',
-				onClose: function(){
-					that.setIn()
-				}
-			})
+			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
 		} else{
-			var fp_in = new flatpickr(this.checkIn.domNode, {
-				enableTime: true,
-				dateFormat: 'm-d-Y h:i K',
-				defaultDate: this.getIn.subject,
-				minuteIncrement: 1,
-				maxDate: 'today',
-				onClose: function(){
-					that.setIn()
-				}
-			})
+			fp_options.defaultDate = this.getIn.subject
+			var fp_in = new flatpickr(this.checkIn.domNode, fp_options )
 		}
 
 		// Check-Out Time
@@ -170,6 +194,7 @@ registerPlugin(proto(Gem, function(){
 
 	// convert check-in time to milliseconds and save it
 	this.setIn = function(){
+		console.log('setIn')
 		this.ticket.set(this.optionsObservee.subject.checkInField, new Date(this.checkIn.val))
 	}
 
