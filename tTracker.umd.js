@@ -91,13 +91,14 @@ registerPlugin(proto(Gem, function(){
 
 	// set ticket field options
 	this.initialize = function(options){
-		// does this need if/else depending on user setting? works like this
+		// does this need if/else depending on user setting?
 		return{
-			timesWorked: {
+			timesWorkedField: 'timesWorked',
+			subfields: {
 				userField: 'user',
 				checkInField: 'checkIn',
 				checkOutField: 'checkOut',
-				timeWorkedField: 'timeWorked',
+				minWorkedField: 'timeWorked',
 				dateField: 'date'
 			}
 		}
@@ -108,6 +109,8 @@ registerPlugin(proto(Gem, function(){
 		this.ticket = ticket
 		this.api = api
 		this.optionsObservee = optionsObservee
+
+		// Timer
 		this.checkIn = TextField()
 		this.checkOut = TextField()
 		this.workedText = Text()
@@ -121,18 +124,23 @@ registerPlugin(proto(Gem, function(){
 		var date = TextField()
 		var errorMessage = Text('error', 'Minutes Worked and Date cannot be empty')
 		errorMessage.visible = false
-		var success = Text('Saved your time')
+		var success = Text('Your Time Has Been Recorded')
 		success.visible = false
 		var duration = Block('div', Text('Minutes Worked: '), minutes, Text(' Date: '), date, errorMessage, success)
 
 		// put an if/else to add either timer or duration depending on user setting?
 		this.add(timer, duration)
 
+	
+		console.log(optionsObservee.subject)
+
+
 		// get access to check-in time on ticket
-		var inProperty = optionsObservee.subject.checkInField
+		var inProperty = optionsObservee.subject.timesWorkedField.checkInField
 		this.getIn = ticket.get(inProperty)
 
-		// Check-In Time
+
+		// Timer - checkIn Time
 		var fp_options = {
 			enableTime: true,
 			dateFormat: 'm-d-Y h:i K',
@@ -150,7 +158,7 @@ registerPlugin(proto(Gem, function(){
 			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
 		}
 
-		// Check-Out Time
+		// Timer - checkOut Time
 		var fp_out = new flatpickr(this.checkOut.domNode, {
 			enableTime: true,
 			dateFormat: 'm-d-Y h:i K',
@@ -177,21 +185,28 @@ registerPlugin(proto(Gem, function(){
 					errorMessage.visible = true
 				} else{
 					errorMessage.visible = false
-					ticket.set(optionsObservee.subject.dateField, new Date(date.val).getTime())
+					ticket.set(optionsObservee.subject.timesWorked.dateField, new Date(date.val).getTime())
 					// to save timeWorked in minuted
-					ticket.set(optionsObservee.subject.timeWorkedField, minutes.val)
+					ticket.set(optionsObservee.subject.timesWorked.minWorkedField, minutes.val)
 					// to save timeWorked in milliseconds
 					// ticket.set(optionsObservee.subject.timeWorkedField, minutes.val*1000*60)
 					api.User.current().then(function(curUser){
 						that.currUser = curUser.subject._id
 					})
-					ticket.set(optionsObservee.subject.userField, that.currUser)
+					ticket.set(optionsObservee.subject.timesWorked.userField, that.currUser)
 					success.visible = true
 					setTimeout(function(){
 						success.visible = false
 					}, 3000)
 					minutes.val = ''
 					date.val = ''
+
+					// var newData = {
+					// 	'dateField': new Date(date.val).getTime(),
+					// 	'minWorkedField': minutes.val*1000*60,
+					// 	'userField': that.currUser
+					// }
+					// console.log(newData)
 				}
 			}
 		})
@@ -205,12 +220,12 @@ registerPlugin(proto(Gem, function(){
 		})
 	}
 
-	// convert check-in time to milliseconds and save it
+	// Timer - convert check-in time to milliseconds and save it
 	this.setIn = function(){
 		this.ticket.set(this.optionsObservee.subject.checkInField, new Date(this.checkIn.val).getTime())
 	}
 
-	// find how long worked and save out/timeWorked/user
+	// Timer - find how long worked and save out/timeWorked/user
 	this.calculateTime = function(){
 		var that = this
 		var tWorked = new Date(that.checkOut.val).getTime() - new Date(this.getIn.subject)
@@ -223,7 +238,6 @@ registerPlugin(proto(Gem, function(){
 			that.workedText.visible = false
 		}, 5000)
 		this.ticket.set(this.optionsObservee.subject.checkOutField, new Date(this.checkOut.val).getTime())
-		// get the current user
 		this.api.User.current().then(function(user){
 			that.currentUser = user.subject._id
 		}).done()
