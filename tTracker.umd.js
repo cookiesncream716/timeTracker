@@ -121,7 +121,9 @@ registerPlugin(proto(Gem, function(){
 		var date = TextField()
 		var errorMessage = Text('error', 'Minutes Worked and Date cannot be empty')
 		errorMessage.visible = false
-		var duration = Block('div', Text('Minutes Worked: '), minutes, Text(' Date: '), date, errorMessage)
+		var success = Text('Saved your time')
+		success.visible = false
+		var duration = Block('div', Text('Minutes Worked: '), minutes, Text(' Date: '), date, errorMessage, success)
 
 		// put an if/else to add either timer or duration depending on user setting?
 		this.add(timer, duration)
@@ -155,7 +157,7 @@ registerPlugin(proto(Gem, function(){
 			minuteIncrement: 1,
 			maxDate: 'today',
 			onClose: function(){
-				if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < new Date(that.getIn.subject).getTime()){
+				if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < that.getIn.subject){
 					errMessage.visible = true
 					that.checkOut.val = ''
 				} else{
@@ -170,20 +172,26 @@ registerPlugin(proto(Gem, function(){
 			dateFormat: 'm-d-Y',
 			maxDate: 'today',
 			onClose: function(){
-				console.log('date' + date.val + 'date')
 				// need to check that this.minutes.val is a number
 				if(date.val == '' || minutes.val ==''){
 					errorMessage.visible = true
 				} else{
 					errorMessage.visible = false
-					ticket.set(optionsObservee.subject.dateField, date.val)
-					// console.log('this.ticket.set(date)' + date.val)
+					ticket.set(optionsObservee.subject.dateField, new Date(date.val).getTime())
+					// to save timeWorked in minuted
 					ticket.set(optionsObservee.subject.timeWorkedField, minutes.val)
-					// console.log('this.ticket.set(this.minutes)' + minutes.val)
+					// to save timeWorked in milliseconds
+					// ticket.set(optionsObservee.subject.timeWorkedField, minutes.val*1000*60)
 					api.User.current().then(function(curUser){
 						that.currUser = curUser.subject._id
 					})
 					ticket.set(optionsObservee.subject.userField, that.currUser)
+					success.visible = true
+					setTimeout(function(){
+						success.visible = false
+					}, 3000)
+					minutes.val = ''
+					date.val = ''
 				}
 			}
 		})
@@ -199,13 +207,13 @@ registerPlugin(proto(Gem, function(){
 
 	// convert check-in time to milliseconds and save it
 	this.setIn = function(){
-		this.ticket.set(this.optionsObservee.subject.checkInField, new Date(this.checkIn.val))
+		this.ticket.set(this.optionsObservee.subject.checkInField, new Date(this.checkIn.val).getTime())
 	}
 
 	// find how long worked and save out/timeWorked/user
 	this.calculateTime = function(){
 		var that = this
-		var tWorked = new Date(that.checkOut.val).getTime() - new Date(this.getIn.subject).getTime()
+		var tWorked = new Date(that.checkOut.val).getTime() - new Date(this.getIn.subject)
 		var hours = Math.floor(tWorked/1000/60/60)
 		tWorked -= hours*1000*60*60
 		var minutes = Math.floor(tWorked/1000/60)
@@ -214,7 +222,7 @@ registerPlugin(proto(Gem, function(){
 		setTimeout(function(){
 			that.workedText.visible = false
 		}, 5000)
-		this.ticket.set(this.optionsObservee.subject.checkOutField, new Date(this.checkOut.val))
+		this.ticket.set(this.optionsObservee.subject.checkOutField, new Date(this.checkOut.val).getTime())
 		// get the current user
 		this.api.User.current().then(function(user){
 			that.currentUser = user.subject._id
