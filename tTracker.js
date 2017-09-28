@@ -48,11 +48,14 @@ registerPlugin(proto(Gem, function(){
 		this.add(timer, duration)
 
 	
-		console.log(optionsObservee.subject)
-
+		// console.log(optionsObservee.subject)
+		// if(optionsObservee.subject.timesWorkedField === undefined){
+		// 	console.log('undefined')
+		// 	ticket.set(optionsObservee.subject.timesWorkedField, [])
+		// }
 
 		// get access to check-in time on ticket
-		var inProperty = optionsObservee.subject.timesWorkedField.checkInField
+		var inProperty = optionsObservee.subject.subfields.checkInField
 		this.getIn = ticket.get(inProperty)
 
 
@@ -101,15 +104,15 @@ registerPlugin(proto(Gem, function(){
 					errorMessage.visible = true
 				} else{
 					errorMessage.visible = false
-					ticket.set(optionsObservee.subject.timesWorked.dateField, new Date(date.val).getTime())
+					ticket.set(optionsObservee.subject.subfields.dateField, new Date(date.val).getTime())
 					// to save timeWorked in minuted
-					ticket.set(optionsObservee.subject.timesWorked.minWorkedField, minutes.val)
+					ticket.set(optionsObservee.subject.subfields.minWorkedField, minutes.val)
 					// to save timeWorked in milliseconds
 					// ticket.set(optionsObservee.subject.timeWorkedField, minutes.val*1000*60)
 					api.User.current().then(function(curUser){
 						that.currUser = curUser.subject._id
 					})
-					ticket.set(optionsObservee.subject.timesWorked.userField, that.currUser)
+					ticket.set(optionsObservee.subject.subfields.userField, that.currUser)
 					success.visible = true
 					setTimeout(function(){
 						success.visible = false
@@ -138,7 +141,7 @@ registerPlugin(proto(Gem, function(){
 
 	// Timer - convert check-in time to milliseconds and save it
 	this.setIn = function(){
-		this.ticket.set(this.optionsObservee.subject.checkInField, new Date(this.checkIn.val).getTime())
+		this.ticket.set(this.optionsObservee.subject.subfields.checkInField, new Date(this.checkIn.val).getTime())
 	}
 
 	// Timer - find how long worked and save out/timeWorked/user
@@ -153,11 +156,11 @@ registerPlugin(proto(Gem, function(){
 		setTimeout(function(){
 			that.workedText.visible = false
 		}, 5000)
-		this.ticket.set(this.optionsObservee.subject.checkOutField, new Date(this.checkOut.val).getTime())
+		this.ticket.set(this.optionsObservee.subject.subfields.checkOutField, new Date(this.checkOut.val).getTime())
 		this.api.User.current().then(function(user){
 			that.currentUser = user.subject._id
 		}).done()
-		this.ticket.set(this.optionsObservee.subject.userField, this.currentUser)
+		this.ticket.set(this.optionsObservee.subject.subfields.userField, this.currentUser)
 		this.checkIn.val = ''
 		this.checkOut.val = ''
 	}
