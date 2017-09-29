@@ -6,25 +6,31 @@ registerPlugin(proto(Gem, function(){
 
 
 	// set ticket field options
+	// this.initialize = function(options){
+	// 	// does this need if/else depending on user setting?
+	// 	return{
+	// 		timesWorkedField: 'timesWorked',
+	// 		subfields: {
+	// 			userField: 'user',
+	// 			checkInField: 'checkIn',
+	// 			checkOutField: 'checkOut',
+	// 			minWorkedField: 'timeWorked',
+	// 			dateField: 'date'
+	// 		}
+	// 	}
+	// }
 	this.initialize = function(options){
-		// does this need if/else depending on user setting?
 		return{
-			timesWorkedField: 'timesWorked',
-			subfields: {
-				userField: 'user',
-				checkInField: 'checkIn',
-				checkOutField: 'checkOut',
-				minWorkedField: 'timeWorked',
-				dateField: 'date'
-			}
+			timesWorkedField: 'timesWorked'
 		}
 	}
 
+
 	this.build = function(ticket, optionsObservee, api){
-		var that = this
 		this.ticket = ticket
 		this.api = api
 		this.optionsObservee = optionsObservee
+		var that = this
 
 		// Timer
 		this.checkIn = TextField()
@@ -47,52 +53,50 @@ registerPlugin(proto(Gem, function(){
 		// put an if/else to add either timer or duration depending on user setting?
 		this.add(timer, duration)
 
-	
-		// console.log(optionsObservee.subject)
-		// if(optionsObservee.subject.timesWorkedField === undefined){
-		// 	console.log('undefined')
-		// 	ticket.set(optionsObservee.subject.timesWorkedField, [])
-		// }
 
-		// get access to check-in time on ticket
-		var inProperty = optionsObservee.subject.subfields.checkInField
-		this.getIn = ticket.get(inProperty)
+		var tWorkedField = optionsObservee.subject.timesWorkedField
 
+		if(ticket.get(tWorkedField).subject === undefined){
+			ticket.set(tWorkedField, [])
+			this.times = ticket.get(tWorkedField).subject
+		} else{
+			this.times = ticket.get(tWorkedField).subject
+		}
 
 		// Timer - checkIn Time
-		var fp_options = {
-			enableTime: true,
-			dateFormat: 'm-d-Y h:i K',
-			minuteIncrement: 1,
-			maxDate: 'today',
-			defaultDate: null,
-			onClose: function(){
-				that.setIn()
-			}
-		}
-		if(this.getIn.subject === undefined){
-			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
-		} else{
-			fp_options.defaultDate = this.getIn.subject
-			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
-		}
+		// var fp_options = {
+		// 	enableTime: true,
+		// 	dateFormat: 'm-d-Y h:i K',
+		// 	minuteIncrement: 1,
+		// 	maxDate: 'today',
+		// 	defaultDate: null,
+		// 	onClose: function(){
+		// 		that.setIn()
+		// 	}
+		// }
+		// if(this.getIn.subject === undefined){
+		// 	var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
+		// } else{
+		// 	fp_options.defaultDate = this.getIn.subject
+		// 	var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
+		// }
 
 		// Timer - checkOut Time
-		var fp_out = new flatpickr(this.checkOut.domNode, {
-			enableTime: true,
-			dateFormat: 'm-d-Y h:i K',
-			minuteIncrement: 1,
-			maxDate: 'today',
-			onClose: function(){
-				if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < that.getIn.subject){
-					errMessage.visible = true
-					that.checkOut.val = ''
-				} else{
-					errMessage.visible = false
-					that.calculateTime()
-				}
-			}
-		})
+		// var fp_out = new flatpickr(this.checkOut.domNode, {
+		// 	enableTime: true,
+		// 	dateFormat: 'm-d-Y h:i K',
+		// 	minuteIncrement: 1,
+		// 	maxDate: 'today',
+		// 	onClose: function(){
+		// 		if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < that.getIn.subject){
+		// 			errMessage.visible = true
+		// 			that.checkOut.val = ''
+		// 		} else{
+		// 			errMessage.visible = false
+		// 			that.calculateTime()
+		// 		}
+		// 	}
+		// })
 
 		// Duration
 		var fp_duration = new flatpickr(date.domNode, {
@@ -104,28 +108,29 @@ registerPlugin(proto(Gem, function(){
 					errorMessage.visible = true
 				} else{
 					errorMessage.visible = false
-					ticket.set(optionsObservee.subject.subfields.dateField, new Date(date.val).getTime())
-					// to save timeWorked in minuted
-					ticket.set(optionsObservee.subject.subfields.minWorkedField, minutes.val)
+					// ticket.set(optionsObservee.subject.subfields.dateField, new Date(date.val).getTime())
+					// to save timeWorked in minutes
+					// ticket.set(optionsObservee.subject.subfields.minWorkedField, minutes.val)
 					// to save timeWorked in milliseconds
 					// ticket.set(optionsObservee.subject.timeWorkedField, minutes.val*1000*60)
 					api.User.current().then(function(curUser){
 						that.currUser = curUser.subject._id
 					})
-					ticket.set(optionsObservee.subject.subfields.userField, that.currUser)
+					// ticket.set(optionsObservee.subject.subfields.userField, that.currUser)
+
+					var data = {
+						'user': that.currUser,
+						'date': new Date(date.val).getTime(),
+						'minWorked': minutes.val
+					}
+					that.times.push(data)
+					ticket.set(tWorkedField, that.times)
 					success.visible = true
 					setTimeout(function(){
 						success.visible = false
 					}, 3000)
 					minutes.val = ''
 					date.val = ''
-
-					// var newData = {
-					// 	'dateField': new Date(date.val).getTime(),
-					// 	'minWorkedField': minutes.val*1000*60,
-					// 	'userField': that.currUser
-					// }
-					// console.log(newData)
 				}
 			}
 		})
@@ -140,30 +145,30 @@ registerPlugin(proto(Gem, function(){
 	}
 
 	// Timer - convert check-in time to milliseconds and save it
-	this.setIn = function(){
-		this.ticket.set(this.optionsObservee.subject.subfields.checkInField, new Date(this.checkIn.val).getTime())
-	}
+	// this.setIn = function(){
+	// 	this.ticket.set(this.optionsObservee.subject.subfields.checkInField, new Date(this.checkIn.val).getTime())
+	// }
 
 	// Timer - find how long worked and save out/timeWorked/user
-	this.calculateTime = function(){
-		var that = this
-		var tWorked = new Date(that.checkOut.val).getTime() - new Date(this.getIn.subject)
-		var hours = Math.floor(tWorked/1000/60/60)
-		tWorked -= hours*1000*60*60
-		var minutes = Math.floor(tWorked/1000/60)
-		this.workedText.text = 'You worked ' + hours + ' hours and ' + minutes + ' minutes.'
-		this.workedText.visible = true
-		setTimeout(function(){
-			that.workedText.visible = false
-		}, 5000)
-		this.ticket.set(this.optionsObservee.subject.subfields.checkOutField, new Date(this.checkOut.val).getTime())
-		this.api.User.current().then(function(user){
-			that.currentUser = user.subject._id
-		}).done()
-		this.ticket.set(this.optionsObservee.subject.subfields.userField, this.currentUser)
-		this.checkIn.val = ''
-		this.checkOut.val = ''
-	}
+	// this.calculateTime = function(){
+	// 	var that = this
+	// 	var tWorked = new Date(that.checkOut.val).getTime() - new Date(this.getIn.subject)
+	// 	var hours = Math.floor(tWorked/1000/60/60)
+	// 	tWorked -= hours*1000*60*60
+	// 	var minutes = Math.floor(tWorked/1000/60)
+	// 	this.workedText.text = 'You worked ' + hours + ' hours and ' + minutes + ' minutes.'
+	// 	this.workedText.visible = true
+	// 	setTimeout(function(){
+	// 		that.workedText.visible = false
+	// 	}, 5000)
+	// 	this.ticket.set(this.optionsObservee.subject.subfields.checkOutField, new Date(this.checkOut.val).getTime())
+	// 	this.api.User.current().then(function(user){
+	// 		that.currentUser = user.subject._id
+	// 	}).done()
+	// 	this.ticket.set(this.optionsObservee.subject.subfields.userField, this.currentUser)
+	// 	this.checkIn.val = ''
+	// 	this.checkOut.val = ''
+	// }
 
 	this.getStyle = function(){
 		return Style({
