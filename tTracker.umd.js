@@ -90,22 +90,16 @@ registerPlugin(proto(Gem, function(){
 
 
 	// set ticket field options
-	// this.initialize = function(options){
-	// 	// does this need if/else depending on user setting?
-	// 	return{
-	// 		timesWorkedField: 'timesWorked',
-	// 		subfields: {
-	// 			userField: 'user',
-	// 			checkInField: 'checkIn',
-	// 			checkOutField: 'checkOut',
-	// 			minWorkedField: 'timeWorked',
-	// 			dateField: 'date'
-	// 		}
-	// 	}
-	// }
 	this.initialize = function(options){
 		return{
-			timesWorkedField: 'timesWorked'
+			timesWorkedField: 'timesWorked',
+			subfields: {
+				userField: 'user',
+				checkInField: 'checkIn',
+				checkOutField: 'checkOut',
+				minWorkedField: 'minWorked',
+				dateField: 'date'
+			}
 		}
 	}
 
@@ -146,6 +140,7 @@ registerPlugin(proto(Gem, function(){
 		} else{
 			this.times = ticket.get(tWorkedField).subject
 		}
+		console.log('1 ', tWorkedField)
 
 		// Timer - checkIn Time
 		// var fp_options = {
@@ -203,11 +198,14 @@ registerPlugin(proto(Gem, function(){
 					// ticket.set(optionsObservee.subject.subfields.userField, that.currUser)
 
 					var data = {
-						'user': that.currUser,
-						'date': new Date(date.val).getTime(),
-						'minWorked': minutes.val
+						'userField': that.currUser,
+						'dateField': new Date(date.val).getTime(),
+						'minWorkedField': minutes.val
 					}
+					// need to get rid of that.times and push data directly into tWorkedField
 					that.times.push(data)
+					console.log('2 ', ticket.get(tWorkedField).subject)
+					// ticket.set(tWorkedField, ticket.get(tWorkedField).push(data))
 					ticket.set(tWorkedField, that.times)
 					success.visible = true
 					setTimeout(function(){
@@ -215,6 +213,7 @@ registerPlugin(proto(Gem, function(){
 					}, 3000)
 					minutes.val = ''
 					date.val = ''
+					console.log('user = ' + ticket.get(tWorkedField).subject[0].userField)
 				}
 			}
 		})
