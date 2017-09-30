@@ -38,7 +38,7 @@ registerPlugin(proto(Gem, function(){
 		// Duration
 		var minutes = TextField()
 		var date = TextField()
-		var errorMessage = Text('error', 'Minutes Worked and Date cannot be empty')
+		var errorMessage = Text('error', 'Minutes Worked must be a number and Date cannot be empty')
 		errorMessage.visible = false
 		var success = Text('Your Time Has Been Recorded')
 		success.visible = false
@@ -52,22 +52,21 @@ registerPlugin(proto(Gem, function(){
 
 		if(ticket.get(this.tWorkedField).subject === undefined){
 			ticket.set(this.tWorkedField, [])
-			this.times = ticket.get(this.tWorkedField).subject
-		} else{
-			this.times = ticket.get(this.tWorkedField).subject
-		}
-		console.log('1 ', this.tWorkedField)
+		} 
 
-		// Timer - flatpickr options
+		// Timer - flatpickr options (not sure variable is necessary anymore)
 		var fp_options = {
 			enableTime: true,
 			dateFormat: 'm-d-Y h:i K',
 			minuteIncrement: 1,
 			maxDate: 'today',
 			// defaultDate: null,
+			// not sure onClose is needed since everything is done onClose of checkOut
 			onClose: function(){
 				// that.setIn()
+				// am not using that.inTime
 				that.inTime = new Date(that.checkIn.val).getTime()
+				// ??? save it until data is saved to ticket and then reset it to undefined
 			}
 		}
 
@@ -87,7 +86,7 @@ registerPlugin(proto(Gem, function(){
 			minuteIncrement: 1,
 			maxDate: 'today',
 			onClose: function(){
-				if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < that.inTime){
+				if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < new Date(that.checkIn.val).getTime()){
 					errMessage.visible = true
 					that.checkOut.val = ''
 				} else{
@@ -102,38 +101,28 @@ registerPlugin(proto(Gem, function(){
 			dateFormat: 'm-d-Y',
 			maxDate: 'today',
 			onClose: function(){
-				// need to check that this.minutes.val is a number
-				if(date.val == '' || minutes.val ==''){
+				if(date.val == '' || Number.isInteger(parseInt(minutes.val)) === false){
 					errorMessage.visible = true
+					minutes.val = ''
+					date.val = ''
 				} else{
 					errorMessage.visible = false
-					// ticket.set(optionsObservee.subject.subfields.dateField, new Date(date.val).getTime())
-					// to save timeWorked in minutes
-					// ticket.set(optionsObservee.subject.subfields.minWorkedField, minutes.val)
-					// to save timeWorked in milliseconds
-					// ticket.set(optionsObservee.subject.timeWorkedField, minutes.val*1000*60)
 					api.User.current().then(function(curUser){
 						that.currUser = curUser.subject._id
 					})
-					// ticket.set(optionsObservee.subject.subfields.userField, that.currUser)
-
 					var data = {
 						'userField': that.currUser,
 						'dateField': new Date(date.val).getTime(),
 						'minWorkedField': minutes.val
 					}
-					// need to get rid of that.times and push data directly into tWorkedField
-					that.times.push(data)
-					console.log('2 ', ticket.get(this.tWorkedField).subject)
-					// ticket.set(this.tWorkedField, ticket.get(this.tWorkedField).push(data))
-					ticket.set(this.tWorkedField, that.times)
+					ticket.get(that.tWorkedField).push(data)
 					success.visible = true
 					setTimeout(function(){
 						success.visible = false
 					}, 3000)
 					minutes.val = ''
 					date.val = ''
-					console.log('user = ' + ticket.get(this.tWorkedField).subject[0].userField)
+					console.log('user = ' + ticket.get(that.tWorkedField).subject[0].userField)
 				}
 			}
 		})
@@ -164,19 +153,15 @@ registerPlugin(proto(Gem, function(){
 		setTimeout(function(){
 			that.workedText.visible = false
 		}, 5000)
-		// this.ticket.set(this.optionsObservee.subject.subfields.checkOutField, new Date(this.checkOut.val).getTime())
 		this.api.User.current().then(function(user){
 			that.currentUser = user.subject._id
 		}).done()
-		// this.ticket.set(this.optionsObservee.subject.subfields.userField, this.currentUser)
 		var info = {
 			'userField': this.currentUser,
 			'checkInField':  that.inTime,
 			'checkOutField': new Date(that.checkOut.val).getTime()
 		}
-		this.times.push(info)
-		this.ticket.set(this.tWorkedField, this.times)
-		// this.ticket.set(this.tWorkedField, this.ticket.get(this.tWorkedField).push(info))
+		this.ticket.get(this.tWorkedField).push(info)
 		this.checkIn.val = ''
 		this.checkOut.val = ''
 	}
