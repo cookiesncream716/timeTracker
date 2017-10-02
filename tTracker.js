@@ -44,8 +44,14 @@ registerPlugin(proto(Gem, function(){
 		success.visible = false
 		var duration = Block('div', Text('Minutes Worked: '), minutes, Text(' Date: '), date, errorMessage, success)
 
+		// Table
+		var button = Button('table')
+		var table = Table()
+		table.visible = false
+		var showTable = Block('div', button, table)
+
 		// put an if/else to add either timer or duration depending on user setting?
-		this.add(timer, duration)
+		this.add(timer, duration, showTable)
 
 
 		this.tWorkedField = optionsObservee.subject.timesWorkedField
@@ -107,6 +113,7 @@ registerPlugin(proto(Gem, function(){
 					date.val = ''
 				} else{
 					errorMessage.visible = false
+					// is it better to put this in a separate function outside of build?
 					api.User.current().then(function(curUser){
 						that.currUser = curUser.subject._id
 					})
@@ -125,6 +132,19 @@ registerPlugin(proto(Gem, function(){
 					console.log('user = ' + ticket.get(that.tWorkedField).subject[0].userField)
 				}
 			}
+		})
+
+		// Table
+		button.on('click', function(){
+			console.log('click - show table')
+			table.header(['user', 'date', 'minutes'])
+			var data = ticket.get(that.tWorkedField).subject
+			console.log(data)
+			for(var i=0; i<data.length; i++){
+				table.row([Text(data[i].userField), Text(data[i].dateField), Text(data[i].minWorkedField)])
+				console.log(data[i].userField)
+			}
+			table.visible = true
 		})
 
 		// css stylesheet for flatpickr
