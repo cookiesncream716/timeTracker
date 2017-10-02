@@ -129,10 +129,12 @@ registerPlugin(proto(Gem, function(){
 		var duration = Block('div', Text('Minutes Worked: '), minutes, Text(' Date: '), date, errorMessage, success)
 
 		// Table
-		var button = Button('table')
+		var openButton = Button('table')
+		var closeButton = Button('close', 'close')
+		closeButton.visible = false
 		var table = Table()
 		table.visible = false
-		var showTable = Block('div', button, table)
+		var showTable = Block('div', openButton, table, closeButton)
 
 		// put an if/else to add either timer or duration depending on user setting?
 		this.add(timer, duration, showTable)
@@ -218,20 +220,28 @@ registerPlugin(proto(Gem, function(){
 			}
 		})
 
-		// Table
-		button.on('click', function(){
+		// Table - only used on Duration
+		openButton.on('click', function(){
 			table.header(['USER', 'DATE', 'MINUTES'])
 			// get rid of variables data/date
-			var data = ticket.get(that.tWorkedField).subject
-			for(var i=0; i<data.length; i++){
-				var date = new Date(data[i].dateField)
+			that.rows = ticket.get(that.tWorkedField).subject
+			for(var i=0; i<that.rows.length; i++){
+				var date = new Date(that.rows[i].dateField)
 				api.User.load(ticket.get(that.tWorkedField).subject[i].userField).then(function(user){
 					that.userName = user[0].displayName()
 				}).done()
-				table.row([Text(that.userName), Text((date.getMonth()+1) + '-' + date.getDate() + '-' + date.getFullYear()), Text(data[i].minWorkedField)])
+				table.row([Text(that.userName), Text((date.getMonth()+1) + '-' + date.getDate() + '-' + date.getFullYear()), Text(that.rows[i].minWorkedField)])
 			}
 			table.visible = true
+			closeButton.visible = true
+			openButton.visible = false
 
+		})
+		closeButton.on('click', function(){
+			table.visible = false
+			closeButton.visible = false
+			openButton.visible = true
+			// need to empty table so it doesn't keep duplicating
 		})
 
 		// css stylesheet for flatpickr
@@ -277,11 +287,36 @@ registerPlugin(proto(Gem, function(){
 		return Style({
 			$div: {
 				display: 'block',
-				padding: 10
+				padding: 10,
+				// fontFamily: 'Open Sans, sans-serif'
 			},
 			$error: {
 				color: 'red',
 				display: 'block'
+			},
+			Table: {
+				TableCell: {
+					borderBottom: '1px solid black',
+					textAlign: 'center',
+					width: 150
+				},
+				display: 'block',
+				marginBottom: 10
+			},
+			$close: {
+				display: 'block',
+				backgroundColor: 'rgb(52, 152, 219)',
+				color: 'white',
+				fontWeight: 'bold',
+				borderRadius: 5
+			},
+			Button: {
+				// make backgroundColor match Tixit's blue
+				backgroundColor: 'rgb(52, 152, 219)',
+				color: 'white',
+				fontWeight: 'bold',
+				borderRadius: 5
+
 			}
 		})
 	}
