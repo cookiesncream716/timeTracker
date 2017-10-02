@@ -47,10 +47,12 @@ registerPlugin(proto(Gem, function(){
 		// Table
 		var openButton = Button('table')
 		var closeButton = Button('close', 'close')
+		// should figure out how to combine both tables and get rid of timerButton
+		var timerButton = Button('timer table')
 		closeButton.visible = false
 		var table = Table()
 		table.visible = false
-		var showTable = Block('div', openButton, table, closeButton)
+		var showTable = Block('div', openButton, timerButton, table, closeButton)
 
 		// put an if/else to add either timer or duration depending on user setting?
 		this.add(timer, duration, showTable)
@@ -131,7 +133,7 @@ registerPlugin(proto(Gem, function(){
 					}, 3000)
 					minutes.val = ''
 					date.val = ''
-					console.log('user = ' + ticket.get(that.tWorkedField).subject[0].userField)
+					// console.log('user = ' + ticket.get(that.tWorkedField).subject[0].userField)
 				}
 			}
 		})
@@ -157,7 +159,29 @@ registerPlugin(proto(Gem, function(){
 			table.visible = false
 			closeButton.visible = false
 			openButton.visible = true
+			timerButton.visible = true
 			// need to empty table so it doesn't keep duplicating
+		})
+
+		// Table - for Timer (can hopefuly be combined with Duration table)
+		timerButton.on('click', function(){
+			table.header(['USER', 'START TIME', 'STOP TIME', 'TOTAL MINUTES'])
+			var tRows = ticket.get(that.tWorkedField).subject
+			// ?? should it dispay date of checkIn rather than date & time of both checkIn & checkOut
+			for(var i=0; i<tRows.length; i++){
+				var inDate = new Date(tRows[i].checkInField)
+				var outDate = new Date(tRows[i].checkOutField)
+				api.User.load(ticket.get(that.tWorkedField).subject[i].userField).then(function(user){
+					that.tUserName = user[0].displayName()
+				}).done()
+				table.row([Text(that.tUserName),
+					Text((inDate.getMonth()+1)+ '-' + inDate.getDate() + '-' + inDate.getFullYear() + ' ' + inDate.getHours() + ':' + inDate.getMinutes()),
+					Text((outDate.getMonth()+1)+ '-' + outDate.getDate() + '-' + outDate.getFullYear() + ' ' + outDate.getHours() + ':' + outDate.getMinutes()),
+					Text((outDate - inDate)/1000/60)])
+			}
+			table.visible = true
+			closeButton.visible = true
+			timerButton.visible = false
 		})
 
 		// css stylesheet for flatpickr
