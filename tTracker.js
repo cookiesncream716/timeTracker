@@ -136,15 +136,18 @@ registerPlugin(proto(Gem, function(){
 
 		// Table
 		button.on('click', function(){
-			console.log('click - show table')
 			table.header(['USER', 'DATE', 'MINUTES'])
 			// get rid of variables data/date
 			var data = ticket.get(that.tWorkedField).subject
 			for(var i=0; i<data.length; i++){
 				var date = new Date(data[i].dateField)
-				table.row([Text(data[i].userField), Text((date.getMonth()+1) + '-' + date.getDate() + '-' + date.getFullYear()), Text(data[i].minWorkedField)])
+				api.User.load(ticket.get(that.tWorkedField).subject[i].userField).then(function(user){
+					that.userName = user[0].displayName()
+				}).done()
+				table.row([Text(that.userName), Text((date.getMonth()+1) + '-' + date.getDate() + '-' + date.getFullYear()), Text(data[i].minWorkedField)])
 			}
 			table.visible = true
+
 		})
 
 		// css stylesheet for flatpickr
