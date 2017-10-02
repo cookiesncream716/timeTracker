@@ -137,12 +137,12 @@ registerPlugin(proto(Gem, function(){
 		// Table
 		button.on('click', function(){
 			console.log('click - show table')
-			table.header(['user', 'date', 'minutes'])
+			table.header(['USER', 'DATE', 'MINUTES'])
+			// get rid of variables data/date
 			var data = ticket.get(that.tWorkedField).subject
-			console.log(data)
 			for(var i=0; i<data.length; i++){
-				table.row([Text(data[i].userField), Text(data[i].dateField), Text(data[i].minWorkedField)])
-				console.log(data[i].userField)
+				var date = new Date(data[i].dateField)
+				table.row([Text(data[i].userField), Text((date.getMonth()+1) + '-' + date.getDate() + '-' + date.getFullYear()), Text(data[i].minWorkedField)])
 			}
 			table.visible = true
 		})
