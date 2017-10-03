@@ -135,6 +135,7 @@ registerPlugin(proto(Gem, function(){
 		var timerButton = Button('timer table')
 		closeButton.visible = false
 		var table = Table()
+		table.header(['USER', 'DATE', 'MINUTES'])
 		table.visible = false
 		var showTable = Block('div', openButton, timerButton, table, closeButton)
 
@@ -217,22 +218,34 @@ registerPlugin(proto(Gem, function(){
 					}, 3000)
 					minutes.val = ''
 					date.val = ''
-					// console.log('user = ' + ticket.get(that.tWorkedField).subject[0].userField)
 				}
 			}
 		})
 
 		// Table - only used on Duration
 		openButton.on('click', function(){
-			table.header(['USER', 'DATE', 'MINUTES'])
-			// get rid of variables data/date
-			that.rows = ticket.get(that.tWorkedField).subject
-			for(var i=0; i<that.rows.length; i++){
-				var date = new Date(that.rows[i].dateField)
+			// ??? get rid of var row
+			var rows = ticket.get(that.tWorkedField).subject
+			for(var i=0; i<rows.length; i++){
+				// var date = new Date(rows[i].dateField)
 				api.User.load(ticket.get(that.tWorkedField).subject[i].userField).then(function(user){
 					that.userName = user[0].displayName()
 				}).done()
-				table.row([Text(that.userName), Text((date.getMonth()+1) + '-' + date.getDate() + '-' + date.getFullYear()), Text(that.rows[i].minWorkedField)])
+				if(ticket.get(that.tWorkedField).subject[i].checkInField === undefined){
+					console.log('no checkInField')
+					table.row([
+						Text(that.userName),
+						Text((new Date(rows[i].dateField).getMonth()+1) + '-' + new Date(rows[i].dateField).getDate() + '-' + new Date(rows[i].dateField).getFullYear()),
+						Text(rows[i].minWorkedField)
+					])
+				} else{
+					console.log('no minWorkedField')
+					table.row([
+						Text(that.userName),
+						Text((new Date(rows[i].checkInField).getMonth()+1) + '-' + new Date(rows[i].checkInField).getDate() + '-' + new Date(rows[i].checkInField).getFullYear()),
+						Text((new Date(rows[i].checkOutField) - new Date(rows[i].checkInField))/1000/60)
+					])
+				}
 			}
 			table.visible = true
 			closeButton.visible = true
@@ -243,28 +256,8 @@ registerPlugin(proto(Gem, function(){
 			table.visible = false
 			closeButton.visible = false
 			openButton.visible = true
+			timerButton.visible = true
 			// need to empty table so it doesn't keep duplicating
-		})
-
-		// Table - for Timer
-		timerButton.on('click', function(){
-			console.log('timer table')
-			table.header(['USER', 'START TIME', 'STOP TIME', 'TOTAL MINUTES'])
-			var tRows = ticket.get(that.tWorkedField).subject
-			for(var i=0; i<tRows.length; i++){
-				var inDate = new Date(tRows[i].checkInField)
-				var outDate = new Date(tRows[i].checkOutField)
-				api.User.load(ticket.get(that.tWorkedField).subject[i].userField).then(function(user){
-					that.tUserName = user[0].displayName()
-				}).done()
-				table.row([Text(that.tUserName),
-					Text((inDate.getMonth()+1)+ '-' + inDate.getDate() + '-' + inDate.getFullYear() + ' ' + inDate.getHours() + ':' + inDate.getMinutes()),
-					Text((outDate.getMonth()+1)+ '-' + outDate.getDate() + '-' + outDate.getFullYear() + ' ' + outDate.getHours() + ':' + outDate.getMinutes()),
-					Text((outDate - inDate)/1000/60)])
-			}
-			table.visible = true
-			closeButton.visible = true
-			timerButton.visible = false
 		})
 
 		// css stylesheet for flatpickr
