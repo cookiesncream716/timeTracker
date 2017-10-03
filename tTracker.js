@@ -19,11 +19,11 @@ registerPlugin(proto(Gem, function(){
 		}
 	}
 
-
 	this.build = function(ticket, optionsObservee, api){
 		this.ticket = ticket
 		this.api = api
 		this.optionsObservee = optionsObservee
+		this.tWorkedField = optionsObservee.subject.timesWorkedField
 		var that = this
 
 		// Timer
@@ -50,9 +50,7 @@ registerPlugin(proto(Gem, function(){
 		closeButton.visible = false
 		var table = Table()
 		table.visible = false
-		var showTable = Block('div', openButton, table, closeButton)
-
-		this.tWorkedField = optionsObservee.subject.timesWorkedField		
+		var showTable = Block('div', openButton, table, closeButton)	
 
 		// ??? put an if/else to add either timer or duration depending on user setting
 		this.add(timer, duration, showTable)
@@ -67,12 +65,13 @@ registerPlugin(proto(Gem, function(){
 			dateFormat: 'm-d-Y h:i K',
 			minuteIncrement: 1,
 			maxDate: 'today',
-			// defaultDate: null,
+			defaultDate: null,
 			// not sure onClose is needed since everything is done onClose of checkOut
 			onClose: function(){
 				// that.setIn()
-				that.inTime = new Date(that.checkIn.val).getTime()
+				// that.inTime = new Date(that.checkIn.val).getTime()
 				// ??? save it until data is saved to ticket and then reset it to undefined
+				that.storeIn()
 			}
 		}
 
@@ -83,7 +82,17 @@ registerPlugin(proto(Gem, function(){
 		// 	fp_options.defaultDate = this.getIn.subject
 		// 	var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
 		// }
-		var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
+		// var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
+
+		// Timer - checkIn time (not sure how it works - can't test it well but thinking checkIn won't be stored. Maybe can have another ticket field used to store just a checkIn then it's reset whenever there's a checkOut and all data is saved to timesWorked)
+		if(this.tempIn !== undefined){
+			console.log('tempIn ' + this.tempIn)
+			fp_options[defaultDate] = new Date(this.tempIn)
+			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
+		} else{
+			console.log(' no tempIn ' + this.tempIn)
+			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
+		}
 
 		// Timer - checkOut Time
 		var fp_out = new flatpickr(this.checkOut.domNode, {
@@ -92,7 +101,7 @@ registerPlugin(proto(Gem, function(){
 			minuteIncrement: 1,
 			maxDate: 'today',
 			onClose: function(){
-				if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < new Date(that.checkIn.val).getTime()){
+				if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < that.tempIn){
 					errMessage.visible = true
 					that.checkOut.val = ''
 				} else{
@@ -113,7 +122,7 @@ registerPlugin(proto(Gem, function(){
 					date.val = ''
 				} else{
 					errorMessage.visible = false
-					// is it better to put this in a separate function outside of build?
+					// ??? is it better to put this in a separate function outside of build
 					api.User.current().then(function(curUser){
 						that.currUser = curUser.subject._id
 					})
@@ -135,6 +144,7 @@ registerPlugin(proto(Gem, function(){
 
 		// Table
 		openButton.on('click', function(){
+			// ??? create table in function outside of build
 			table.header(['USER', 'DATE', 'MINUTES'])
 			// ??? get rid of var row
 			var rows = ticket.get(that.tWorkedField).subject
@@ -159,14 +169,17 @@ registerPlugin(proto(Gem, function(){
 			table.visible = true
 			closeButton.visible = true
 			openButton.visible = false
+			duration.visible = false
+			timer.visible = false
 
 		})
 		closeButton.on('click', function(){
 			table.visible = false
 			closeButton.visible = false
 			openButton.visible = true
+			duration.visible = true
+			timer.visible = true
 			table.remove(table.children)
-			// need to empty table so it doesn't keep duplicating
 		})
 
 		// css stylesheet for flatpickr
@@ -183,10 +196,15 @@ registerPlugin(proto(Gem, function(){
 	// 	this.ticket.set(this.optionsObservee.subject.subfields.checkInField, new Date(this.checkIn.val).getTime())
 	// }
 
+	// Timer -save checkIn temporarily?
+	this.storeIn = function(){
+		this.tempIn = new Date(this.checkIn.val).getTime()
+	}
+
 	// Timer - find how long worked and save everything to ticket
 	this.saveTime = function(){
 		var that = this
-		var msWorked = new Date(that.checkOut.val).getTime() - that.inTime
+		var msWorked = new Date(that.checkOut.val).getTime() - that.tempIn
 		var hours = Math.floor(msWorked/1000/60/60)
 		msWorked -= hours*1000*60*60
 		var minutes = Math.floor(msWorked/1000/60)
@@ -200,7 +218,7 @@ registerPlugin(proto(Gem, function(){
 		}).done()
 		var info = {
 			'userField': this.currentUser,
-			'checkInField':  that.inTime,
+			'checkInField':  that.tempIn,
 			// 'checkInField': new Date(that.checkIn.val).getTime(),
 			'checkOutField': new Date(that.checkOut.val).getTime()
 		}
