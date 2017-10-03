@@ -49,15 +49,13 @@ registerPlugin(proto(Gem, function(){
 		var closeButton = Button('close', 'close')
 		closeButton.visible = false
 		var table = Table()
-		table.header(['USER', 'DATE', 'MINUTES'])
 		table.visible = false
 		var showTable = Block('div', openButton, table, closeButton)
 
-		// put an if/else to add either timer or duration depending on user setting?
+		this.tWorkedField = optionsObservee.subject.timesWorkedField		
+
+		// ??? put an if/else to add either timer or duration depending on user setting
 		this.add(timer, duration, showTable)
-
-
-		this.tWorkedField = optionsObservee.subject.timesWorkedField
 
 		if(ticket.get(this.tWorkedField).subject === undefined){
 			ticket.set(this.tWorkedField, [])
@@ -73,7 +71,6 @@ registerPlugin(proto(Gem, function(){
 			// not sure onClose is needed since everything is done onClose of checkOut
 			onClose: function(){
 				// that.setIn()
-				// am not using that.inTime
 				that.inTime = new Date(that.checkIn.val).getTime()
 				// ??? save it until data is saved to ticket and then reset it to undefined
 			}
@@ -100,7 +97,7 @@ registerPlugin(proto(Gem, function(){
 					that.checkOut.val = ''
 				} else{
 					errMessage.visible = false
-					that.calculateTime()
+					that.saveTime()
 				}
 			}
 		})
@@ -138,6 +135,7 @@ registerPlugin(proto(Gem, function(){
 
 		// Table
 		openButton.on('click', function(){
+			table.header(['USER', 'DATE', 'MINUTES'])
 			// ??? get rid of var row
 			var rows = ticket.get(that.tWorkedField).subject
 			for(var i=0; i<rows.length; i++){
@@ -145,14 +143,12 @@ registerPlugin(proto(Gem, function(){
 					that.userName = user[0].displayName()
 				}).done()
 				if(ticket.get(that.tWorkedField).subject[i].checkInField === undefined){
-					console.log('no checkInField')
 					table.row([
 						Text(that.userName),
 						Text((new Date(rows[i].dateField).getMonth()+1) + '-' + new Date(rows[i].dateField).getDate() + '-' + new Date(rows[i].dateField).getFullYear()),
 						Text(rows[i].minWorkedField)
 					])
 				} else{
-					console.log('no minWorkedField')
 					table.row([
 						Text(that.userName),
 						Text((new Date(rows[i].checkInField).getMonth()+1) + '-' + new Date(rows[i].checkInField).getDate() + '-' + new Date(rows[i].checkInField).getFullYear()),
@@ -169,6 +165,7 @@ registerPlugin(proto(Gem, function(){
 			table.visible = false
 			closeButton.visible = false
 			openButton.visible = true
+			table.remove(table.children)
 			// need to empty table so it doesn't keep duplicating
 		})
 
@@ -187,7 +184,7 @@ registerPlugin(proto(Gem, function(){
 	// }
 
 	// Timer - find how long worked and save everything to ticket
-	this.calculateTime = function(){
+	this.saveTime = function(){
 		var that = this
 		var msWorked = new Date(that.checkOut.val).getTime() - that.inTime
 		var hours = Math.floor(msWorked/1000/60/60)
@@ -204,6 +201,7 @@ registerPlugin(proto(Gem, function(){
 		var info = {
 			'userField': this.currentUser,
 			'checkInField':  that.inTime,
+			// 'checkInField': new Date(that.checkIn.val).getTime(),
 			'checkOutField': new Date(that.checkOut.val).getTime()
 		}
 		this.ticket.get(this.tWorkedField).push(info)
