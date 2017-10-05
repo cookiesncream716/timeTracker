@@ -99,7 +99,8 @@ registerPlugin(proto(Gem, function(){
 				checkOutField: 'checkOut',
 				minWorkedField: 'minWorked',
 				dateField: 'date'
-			}
+			},
+			tempInField: 'tempIn'
 		}
 	}
 
@@ -150,31 +151,18 @@ registerPlugin(proto(Gem, function(){
 			minuteIncrement: 1,
 			maxDate: 'today',
 			defaultDate: null,
-			// not sure onClose is needed since everything is done onClose of checkOut
 			onClose: function(){
-				// that.setIn()
-				// that.inTime = new Date(that.checkIn.val).getTime()
-				// ??? save it until data is saved to ticket and then reset it to undefined
 				that.storeIn()
 			}
 		}
 
 		// Timer - checkIn Time
-		// if(this.getIn.subject === undefined){
-		// 	var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
-		// } else{
-		// 	fp_options.defaultDate = this.getIn.subject
-		// 	var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
-		// }
-		// var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
-
-		// Timer - checkIn time (not sure how it works - can't test it well but thinking checkIn won't be stored. Maybe can have another ticket field used to store just a checkIn then it's reset whenever there's a checkOut and all data is saved to timesWorked)
-		if(this.tempIn !== undefined){
-			console.log('tempIn ' + this.tempIn)
-			fp_options[defaultDate] = new Date(this.tempIn)
+		if(ticket.get(optionsObservee.subject.tempInField).subject === undefined || ticket.get(optionsObservee.subject.tempInField).subject === ''){
+			console.log('undefined or empty string')
 			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
 		} else{
-			console.log(' no tempIn ' + this.tempIn)
+			console.log('else')
+			fp_options.defaultDate = ticket.get(optionsObservee.subject.tempInField).subject
 			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
 		}
 
@@ -185,7 +173,7 @@ registerPlugin(proto(Gem, function(){
 			minuteIncrement: 1,
 			maxDate: 'today',
 			onClose: function(){
-				if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < that.tempIn){
+				if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < ticket.get(optionsObservee.subject.tempInField).subject){
 					errMessage.visible = true
 					that.checkOut.val = ''
 				} else{
@@ -275,20 +263,15 @@ registerPlugin(proto(Gem, function(){
 		})
 	}
 
-	// Timer - convert check-in time to milliseconds and save it
-	// this.setIn = function(){
-	// 	this.ticket.set(this.optionsObservee.subject.subfields.checkInField, new Date(this.checkIn.val).getTime())
-	// }
-
-	// Timer -save checkIn temporarily?
+	// Timer -save checkIn temporarily
 	this.storeIn = function(){
-		this.tempIn = new Date(this.checkIn.val).getTime()
+		this.ticket.set(this.optionsObservee.subject.tempInField, new Date(this.checkIn.val).getTime())
 	}
 
 	// Timer - find how long worked and save everything to ticket
 	this.saveTime = function(){
 		var that = this
-		var msWorked = new Date(that.checkOut.val).getTime() - that.tempIn
+		var msWorked = new Date(that.checkOut.val).getTime() - this.ticket.get(this.optionsObservee.subject.tempInField).subject
 		var hours = Math.floor(msWorked/1000/60/60)
 		msWorked -= hours*1000*60*60
 		var minutes = Math.floor(msWorked/1000/60)
@@ -302,13 +285,13 @@ registerPlugin(proto(Gem, function(){
 		}).done()
 		var info = {
 			'userField': this.currentUser,
-			'checkInField':  that.tempIn,
-			// 'checkInField': new Date(that.checkIn.val).getTime(),
+			'checkInField': this.ticket.get(this.optionsObservee.subject.tempInField).subject,
 			'checkOutField': new Date(that.checkOut.val).getTime()
 		}
 		this.ticket.get(this.tWorkedField).push(info)
 		this.checkIn.val = ''
 		this.checkOut.val = ''
+		this.ticket.set(this.optionsObservee.subject.tempInField, '')
 	}
 
 	this.getStyle = function(){
