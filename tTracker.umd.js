@@ -82,6 +82,8 @@ return /******/ (function(modules) { // webpackBootstrap
 /*! all exports used */
 /***/ (function(module, exports, __webpack_require__) {
 
+"use strict";
+
 var flatpickr = __webpack_require__(/*! flatpickr */ 1)
 
 registerPlugin(proto(Gem, function(){
@@ -156,13 +158,16 @@ registerPlugin(proto(Gem, function(){
 			}
 		}
 
+		// THIS WILL NEED TO BE DELETED - here for testing
+		ticket.set(optionsObservee.subject.tempInField, new Date('October 4, 2017 6:30').getTime())
+		console.log(ticket.get(optionsObservee.subject.tempInField).subject)
 		// Timer - checkIn Time
 		if(ticket.get(optionsObservee.subject.tempInField).subject === undefined || ticket.get(optionsObservee.subject.tempInField).subject === ''){
-			console.log('undefined or empty string')
+			console.log('tempIn undefined/empty')
 			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
 		} else{
-			console.log('else')
-			fp_options.defaultDate = ticket.get(optionsObservee.subject.tempInField).subject
+			console.log('tempIn defined')
+			fp_options.defaultDate = new Date(ticket.get(optionsObservee.subject.tempInField).subject)
 			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
 		}
 
@@ -173,12 +178,13 @@ registerPlugin(proto(Gem, function(){
 			minuteIncrement: 1,
 			maxDate: 'today',
 			onClose: function(){
+				console.log('timer closed')
 				if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < ticket.get(optionsObservee.subject.tempInField).subject){
 					errMessage.visible = true
 					that.checkOut.val = ''
 				} else{
 					errMessage.visible = false
-					that.saveTime()
+					that.saveTime().done()
 				}
 			}
 		})
@@ -188,6 +194,7 @@ registerPlugin(proto(Gem, function(){
 			dateFormat: 'm-d-Y',
 			maxDate: 'today',
 			onClose: function(){
+				console.log('duration closed')
 				if(date.val == '' || Number.isInteger(parseInt(minutes.val)) === false){
 					errorMessage.visible = true
 					minutes.val = ''
@@ -195,21 +202,37 @@ registerPlugin(proto(Gem, function(){
 				} else{
 					errorMessage.visible = false
 					// ??? is it better to put this in a separate function outside of build
-					api.User.current().then(function(curUser){
-						that.currUser = curUser.subject._id
+					// api.User.current().then(function(curUser){
+					// 	that.currUser = curUser.subject._id
+					// })
+					// var data = {
+					// 	'userField': that.currUser,
+					// 	'dateField': new Date(date.val).getTime(),
+					// 	'minWorkedField': minutes.val
+					// }
+					return api.User.current().then(function(curUser){
+						console.log('user api')
+						var data = {
+							'userField': curUser.subject._id,
+							'dateField': new Date(date.val).getTime(),
+							'minWorkedField': minutes.val
+						}
+						ticket.get(that.tWorkedField).push(data)
+						success.visible = true
+						setTimeout(function(){
+							success.visible = false
+						}, 3000)
+						minutes.val = ''
+						date.val = ''
+						console.log('end user api')
 					})
-					var data = {
-						'userField': that.currUser,
-						'dateField': new Date(date.val).getTime(),
-						'minWorkedField': minutes.val
-					}
-					ticket.get(that.tWorkedField).push(data)
-					success.visible = true
-					setTimeout(function(){
-						success.visible = false
-					}, 3000)
-					minutes.val = ''
-					date.val = ''
+					// ticket.get(that.tWorkedField).push(data)
+					// success.visible = true
+					// setTimeout(function(){
+					// 	success.visible = false
+					// }, 3000)
+					// minutes.val = ''
+					// date.val = ''
 				}
 			}
 		})
@@ -266,6 +289,7 @@ registerPlugin(proto(Gem, function(){
 	// Timer -save checkIn temporarily
 	this.storeIn = function(){
 		this.ticket.set(this.optionsObservee.subject.tempInField, new Date(this.checkIn.val).getTime())
+		console.log('storeIn = ' + new Date(this.ticket.get(this.optionsObservee.subject.tempInField).subject))
 	}
 
 	// Timer - find how long worked and save everything to ticket
@@ -280,18 +304,35 @@ registerPlugin(proto(Gem, function(){
 		setTimeout(function(){
 			that.workedText.visible = false
 		}, 5000)
-		this.api.User.current().then(function(user){
-			that.currentUser = user.subject._id
-		}).done()
-		var info = {
-			'userField': this.currentUser,
-			'checkInField': this.ticket.get(this.optionsObservee.subject.tempInField).subject,
-			'checkOutField': new Date(that.checkOut.val).getTime()
-		}
-		this.ticket.get(this.tWorkedField).push(info)
-		this.checkIn.val = ''
-		this.checkOut.val = ''
-		this.ticket.set(this.optionsObservee.subject.tempInField, '')
+		// this.api.User.current().then(function(user){
+		// 	that.currentUser = user.subject._id
+		// 	console.log('user ' + that.currentUser)
+		// }).done()
+		// var info = {
+		// 	'userField': this.currentUser,
+		// 	'checkInField': this.ticket.get(this.optionsObservee.subject.tempInField).subject,
+		// 	'checkOutField': new Date(that.checkOut.val).getTime()
+		// }
+		return this.api.User.current().then(function(user){
+			console.log('timer user api')
+			var info = {
+				'userField': user.subject._id,
+				'checkInField': that.ticket.get(that.optionsObservee.subject.tempInField).subject,
+				'checkOutField': new Date(that.checkOut.val).getTime()
+			}
+			that.ticket.get(that.tWorkedField).push(info)
+			that.checkIn.val = ''
+			that.checkOut.val = ''
+			that.ticket.set(that.optionsObservee.subject.tempInField, '')
+			console.log('timer end user api ', ticket.get(that.tWorkedField).subject)
+		})
+		// console.log('info', info)
+		// console.log('before push', this.ticket.get(this.tWorkedField).subject)
+		// this.ticket.get(this.tWorkedField).push(info)
+		// console.log('after push', this.ticket.get(this.tWorkedField).subject)
+		// this.checkIn.val = ''
+		// this.checkOut.val = ''
+		// this.ticket.set(this.optionsObservee.subject.tempInField, '')
 	}
 
 	this.getStyle = function(){
