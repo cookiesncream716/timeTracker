@@ -138,24 +138,43 @@ registerPlugin(proto(Gem, function(){
 		openButton.on('click', function(){
 			// ??? create table in function outside of build
 			table.header(['USER', 'DATE', 'MINUTES'])
+			console.log('rows ', ticket.get(that.tWorkedField))
 			var rows = ticket.get(that.tWorkedField).subject
+			console.log('rows = ', rows)
+			console.log(rows[0].user + rows[0].date + rows[0].minWorked)
 			for(var i=0; i<rows.length; i++){
-				api.User.load(ticket.get(that.tWorkedField).subject[i].userField).then(function(user){
-					that.userName = user[0].displayName()
+				api.User.load(rows[i].user).then(function(user){
+					// that.userName = user[0].displayName()
+					console.log('load user ', rows[i].user)
+					if(rows[i].checkIn === undefined){
+						table.row([
+							// Text(that.userName),
+							Text(user[0].subject.name),
+							Text((new Date(rows[i].date).getMonth()+1) + '-' + new Date(rows[i].date).getDate() + '-' + new Date(rows[i].date).getFullYear()),
+							Text(rows[i].minWorked)
+						])
+					} else{
+						table.row([
+							// Text(that.userName),
+							Text(user[0].subject.name),
+							Text((new Date(rows[i].checkIn).getMonth()+1) + '-' + new Date(rows[i].checkIn).getDate() + '-' + new Date(rows[i].checkIn).getFullYear()),
+							Text((new Date(rows[i].checkOut) - new Date(rows[i].checkIn))/1000/60)
+						])
+					}
 				}).done()
-				if(ticket.get(that.tWorkedField).subject[i].checkInField === undefined){
-					table.row([
-						Text(that.userName),
-						Text((new Date(rows[i].dateField).getMonth()+1) + '-' + new Date(rows[i].dateField).getDate() + '-' + new Date(rows[i].dateField).getFullYear()),
-						Text(rows[i].minWorkedField)
-					])
-				} else{
-					table.row([
-						Text(that.userName),
-						Text((new Date(rows[i].checkInField).getMonth()+1) + '-' + new Date(rows[i].checkInField).getDate() + '-' + new Date(rows[i].checkInField).getFullYear()),
-						Text((new Date(rows[i].checkOutField) - new Date(rows[i].checkInField))/1000/60)
-					])
-				}
+				// if(ticket.get(that.tWorkedField).subject[i].checkInField === undefined){
+				// 	table.row([
+				// 		Text(that.userName),
+				// 		Text((new Date(rows[i].dateField).getMonth()+1) + '-' + new Date(rows[i].dateField).getDate() + '-' + new Date(rows[i].dateField).getFullYear()),
+				// 		Text(rows[i].minWorkedField)
+				// 	])
+				// } else{
+				// 	table.row([
+				// 		Text(that.userName),
+				// 		Text((new Date(rows[i].checkInField).getMonth()+1) + '-' + new Date(rows[i].checkInField).getDate() + '-' + new Date(rows[i].checkInField).getFullYear()),
+				// 		Text((new Date(rows[i].checkOutField) - new Date(rows[i].checkInField))/1000/60)
+				// 	])
+				// }
 			}
 			table.visible = true
 			closeButton.visible = true
