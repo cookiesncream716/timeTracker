@@ -118,9 +118,9 @@ registerPlugin(proto(Gem, function(){
 					api.User.current().then(function(curUser){
 						var fields = optionsObservee.subject
 						var data = {}
-						data[fields.userField] = curUser.subject._id
-						data[fields.dateField] = new Date(date.val).getTime()
-						data[fields.minWorkedField] = parseInt(minutes.val)
+						data[fields.subfields.userField] = curUser.subject._id
+						data[fields.subfields.dateField] = new Date(date.val).getTime()
+						data[fields.subfields.minWorkedField] = parseInt(minutes.val)
 						ticket.get(that.tWorkedField).push(data)
 						console.log('data ', data)
 						success.visible = true
@@ -202,9 +202,9 @@ registerPlugin(proto(Gem, function(){
 		return this.api.User.current().then(function(user){
 			var fields = that.optionsObservee.subject
 			var info = {}
-			info[fields.userField] = user.subject._id
-			info[fields.checkInField] = that.ticket.get(that.optionsObservee.subject.tempInField).subject
-			info[fields.checkOutField] = new Date(that.checkOut.val).getTime()
+			info[fields.subfields.userField] = user.subject._id
+			info[fields.subfields.checkInField] = that.ticket.get(that.optionsObservee.subject.tempInField).subject
+			info[fields.subfields.checkOutField] = new Date(that.checkOut.val).getTime()
 			that.ticket.get(that.tWorkedField).push(info)
 			that.checkIn.val = ''
 			that.checkOut.val = ''
