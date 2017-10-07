@@ -162,7 +162,7 @@ registerPlugin(proto(Gem, function(){
 		ticket.set(optionsObservee.subject.tempInField, new Date('October 4, 2017 6:30').getTime())
 		console.log(ticket.get(optionsObservee.subject.tempInField).subject)
 		// Timer - checkIn Time
-		if(ticket.get(optionsObservee.subject.tempInField).subject === undefined || ticket.get(optionsObservee.subject.tempInField).subject === ''){
+		if(ticket.get(optionsObservee.subject.tempInField).subject === undefined){
 			console.log('tempIn undefined/empty')
 			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
 		} else{
@@ -178,7 +178,6 @@ registerPlugin(proto(Gem, function(){
 			minuteIncrement: 1,
 			maxDate: 'today',
 			onClose: function(){
-				console.log('timer closed')
 				if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < ticket.get(optionsObservee.subject.tempInField).subject){
 					errMessage.visible = true
 					that.checkOut.val = ''
@@ -194,7 +193,6 @@ registerPlugin(proto(Gem, function(){
 			dateFormat: 'm-d-Y',
 			maxDate: 'today',
 			onClose: function(){
-				console.log('duration closed')
 				if(date.val == '' || Number.isInteger(parseInt(minutes.val)) === false){
 					errorMessage.visible = true
 					minutes.val = ''
@@ -202,37 +200,21 @@ registerPlugin(proto(Gem, function(){
 				} else{
 					errorMessage.visible = false
 					// ??? is it better to put this in a separate function outside of build
-					// api.User.current().then(function(curUser){
-					// 	that.currUser = curUser.subject._id
-					// })
-					// var data = {
-					// 	'userField': that.currUser,
-					// 	'dateField': new Date(date.val).getTime(),
-					// 	'minWorkedField': minutes.val
-					// }
-					return api.User.current().then(function(curUser){
-						console.log('user api')
-						var data = {
-							'userField': curUser.subject._id,
-							'dateField': new Date(date.val).getTime(),
-							'minWorkedField': minutes.val
-						}
+					api.User.current().then(function(curUser){
+						var fields = optionsObservee.subject
+						var data = {}
+						data[fields.userField] = curUser.subject._id
+						data[fields.dateField] = new Date(date.val).getTime()
+						data[fields.minWorkedField] = parseInt(minutes.val)
 						ticket.get(that.tWorkedField).push(data)
+						console.log('data ', data)
 						success.visible = true
 						setTimeout(function(){
 							success.visible = false
 						}, 3000)
 						minutes.val = ''
 						date.val = ''
-						console.log('end user api')
-					})
-					// ticket.get(that.tWorkedField).push(data)
-					// success.visible = true
-					// setTimeout(function(){
-					// 	success.visible = false
-					// }, 3000)
-					// minutes.val = ''
-					// date.val = ''
+					}).done()
 				}
 			}
 		})
@@ -241,7 +223,6 @@ registerPlugin(proto(Gem, function(){
 		openButton.on('click', function(){
 			// ??? create table in function outside of build
 			table.header(['USER', 'DATE', 'MINUTES'])
-			// ??? get rid of var row
 			var rows = ticket.get(that.tWorkedField).subject
 			for(var i=0; i<rows.length; i++){
 				api.User.load(ticket.get(that.tWorkedField).subject[i].userField).then(function(user){
@@ -289,7 +270,6 @@ registerPlugin(proto(Gem, function(){
 	// Timer -save checkIn temporarily
 	this.storeIn = function(){
 		this.ticket.set(this.optionsObservee.subject.tempInField, new Date(this.checkIn.val).getTime())
-		console.log('storeIn = ' + new Date(this.ticket.get(this.optionsObservee.subject.tempInField).subject))
 	}
 
 	// Timer - find how long worked and save everything to ticket
@@ -304,35 +284,17 @@ registerPlugin(proto(Gem, function(){
 		setTimeout(function(){
 			that.workedText.visible = false
 		}, 5000)
-		// this.api.User.current().then(function(user){
-		// 	that.currentUser = user.subject._id
-		// 	console.log('user ' + that.currentUser)
-		// }).done()
-		// var info = {
-		// 	'userField': this.currentUser,
-		// 	'checkInField': this.ticket.get(this.optionsObservee.subject.tempInField).subject,
-		// 	'checkOutField': new Date(that.checkOut.val).getTime()
-		// }
 		return this.api.User.current().then(function(user){
-			console.log('timer user api')
-			var info = {
-				'userField': user.subject._id,
-				'checkInField': that.ticket.get(that.optionsObservee.subject.tempInField).subject,
-				'checkOutField': new Date(that.checkOut.val).getTime()
-			}
+			var fields = that.optionsObservee.subject
+			var info = {}
+			info[fields.userField] = user.subject._id
+			info[fields.checkInField] = that.ticket.get(that.optionsObservee.subject.tempInField).subject
+			info[fields.checkOutField] = new Date(that.checkOut.val).getTime()
 			that.ticket.get(that.tWorkedField).push(info)
 			that.checkIn.val = ''
 			that.checkOut.val = ''
-			that.ticket.set(that.optionsObservee.subject.tempInField, '')
-			console.log('timer end user api ', ticket.get(that.tWorkedField).subject)
+			that.ticket.set(that.optionsObservee.subject.tempInField, undefined)
 		})
-		// console.log('info', info)
-		// console.log('before push', this.ticket.get(this.tWorkedField).subject)
-		// this.ticket.get(this.tWorkedField).push(info)
-		// console.log('after push', this.ticket.get(this.tWorkedField).subject)
-		// this.checkIn.val = ''
-		// this.checkOut.val = ''
-		// this.ticket.set(this.optionsObservee.subject.tempInField, '')
 	}
 
 	this.getStyle = function(){
