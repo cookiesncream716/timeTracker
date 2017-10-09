@@ -144,7 +144,7 @@ registerPlugin(proto(Gem, function(){
 			ticket.set(this.tWorkedField, [])
 		} 
 
-		// Timer - flatpickr options (not sure variable is necessary anymore)
+		// Timer - flatpickr options
 		var fp_options = {
 			enableTime: true,
 			dateFormat: 'm-d-Y h:i K',
@@ -161,7 +161,6 @@ registerPlugin(proto(Gem, function(){
 			console.log('tempIn undefined/empty')
 			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
 		} else{
-			// seems to be mostly working and displaying saved checkIn but not 100% 
 			console.log('tempIn defined')
 			console.log(new Date(ticket.get(optionsObservee.subject.tempInField).subject))
 			fp_options['defaultDate'] = new Date(ticket.get(optionsObservee.subject.tempInField).subject)
@@ -220,8 +219,9 @@ registerPlugin(proto(Gem, function(){
 			table.header(['USER', 'DATE', 'MINUTES'])
 			var rows = ticket.get(that.tWorkedField).subject
 			var totalMin = 0
+			var tRows = []
 			rows.forEach(function(row){
-				api.User.loadOne(row.user).then(function(users){
+				tRows.push(api.User.loadOne(row.user).then(function(users){
 					if(!('checkIn' in row)){
 						table.row([
 							Text(users.subject.name),
@@ -237,14 +237,15 @@ registerPlugin(proto(Gem, function(){
 						])
 						totalMin += ((new Date(row.checkOut) - new Date(row.checkIn))/1000/60)
 					}
-				}).done()
+				}))
 			})
-			if(totalMin < 59){
-				table.row([Text('total', 'Total Time Worked'), Text(''), Text('total', totalMin + ' Minutes')])
-			} else{
-				table.row([Text('total', 'Total Time Worked'), Text(''), Text('total', Math.floor(totalMin/60) + ' Hours ' + (totalMin%60) + ' Minutes')])
-			}
-			// table.row([Text('total', 'Total Time Worked'), Text(''), Text(totalMin)])
+			Future.all(tRows).then(function(){
+				if(totalMin < 59){
+					table.row([Text('total', 'Total Time Worked'), Text(''), Text('total', totalMin + ' Minutes')])
+				} else{
+					table.row([Text('total', 'Total Time Worked'), Text(''), Text('total', Math.floor(totalMin/60) + ' Hours ' + (totalMin%60) + ' Minutes')])
+				}
+			})
 			table.visible = true
 			closeButton.visible = true
 			openButton.visible = false
