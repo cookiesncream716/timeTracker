@@ -142,26 +142,29 @@ registerPlugin(proto(Gem, function(){
 			var rows = ticket.get(that.tWorkedField).subject
 			console.log('rows = ', rows)
 			console.log(rows[0].user + rows[0].date + rows[0].minWorked)
-			for(var i=0; i<rows.length; i++){
-				api.User.load(rows[i].user).then(function(user){
+			rows.forEach(function(row){
+				console.log('minWorked' + row.minWorked)
+				console.log('user ' + row.user)
+				api.User.load(row.user).then(function(users){
 					// that.userName = user[0].displayName()
-					console.log('load user ', rows[i].user)
-					if(rows[i].checkIn === undefined){
+					console.log('load user ', row.user)
+					if(row.checkIn === undefined){
 						table.row([
 							// Text(that.userName),
-							Text(user[0].subject.name),
-							Text((new Date(rows[i].date).getMonth()+1) + '-' + new Date(rows[i].date).getDate() + '-' + new Date(rows[i].date).getFullYear()),
-							Text(rows[i].minWorked)
+							Text(users[0].subject.name),
+							Text((new Date(row.date).getMonth()+1) + '-' + new Date(row.date).getDate() + '-' + new Date(row.date).getFullYear()),
+							Text(row.minWorked)
 						])
 					} else{
 						table.row([
 							// Text(that.userName),
-							Text(user[0].subject.name),
-							Text((new Date(rows[i].checkIn).getMonth()+1) + '-' + new Date(rows[i].checkIn).getDate() + '-' + new Date(rows[i].checkIn).getFullYear()),
-							Text((new Date(rows[i].checkOut) - new Date(rows[i].checkIn))/1000/60)
+							Text(users[0].subject.name),
+							Text((new Date(row.checkIn).getMonth()+1) + '-' + new Date(row.checkIn).getDate() + '-' + new Date(row.checkIn).getFullYear()),
+							Text((new Date(row.checkOut) - new Date(row.checkIn))/1000/60)
 						])
 					}
 				}).done()
+
 				// if(ticket.get(that.tWorkedField).subject[i].checkInField === undefined){
 				// 	table.row([
 				// 		Text(that.userName),
@@ -175,7 +178,7 @@ registerPlugin(proto(Gem, function(){
 				// 		Text((new Date(rows[i].checkOutField) - new Date(rows[i].checkInField))/1000/60)
 				// 	])
 				// }
-			}
+			})
 			table.visible = true
 			closeButton.visible = true
 			openButton.visible = false
