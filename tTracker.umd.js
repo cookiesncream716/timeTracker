@@ -242,7 +242,7 @@ registerPlugin(proto(Gem, function(){
 			if(totalMin < 59){
 				table.row([Text('total', 'Total Time Worked'), Text(''), Text('total', totalMin + ' Minutes')])
 			} else{
-				table.row([Text('total', 'Total Time Worked'), Text(''), Text('total', Math.floor(totalMin/60) + ' Hours' + (totalMin%60) + ' Minutes')])
+				table.row([Text('total', 'Total Time Worked'), Text(''), Text('total', Math.floor(totalMin/60) + ' Hours ' + (totalMin%60) + ' Minutes')])
 			}
 			// table.row([Text('total', 'Total Time Worked'), Text(''), Text(totalMin)])
 			table.visible = true
