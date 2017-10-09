@@ -9,7 +9,7 @@
 		PluginTester.Api.Ticket.create().then(function(testTicket){
 			// testTicket.subject.tempIn = new Date("October 1, 2017 5:55").getTime()
 
-			PluginTester('TimeTracker', {timesWorkedField: 'timesWorked', subfields: {checkInField: 'checkIn', checkoutField: 'checkOut', userField: 'user', dateField: 'date', minWorkedField: 'minWorked'}, tempInField: 'tempIn'}, {ticketId: testTicket.subject._id, showEditor: true})
+			PluginTester('TimeTracker', {timesWorkedField: 'timesWorked', subfields: {checkInField: 'checkIn', checkOutField: 'checkOut', userField: 'user', dateField: 'date', minWorkedField: 'minWorked'}, tempInField: 'tempIn'}, {ticketId: testTicket.subject._id, showEditor: true})
 		}).done()
    	</script>
 </html>

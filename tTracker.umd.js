@@ -158,16 +158,15 @@ registerPlugin(proto(Gem, function(){
 			}
 		}
 
-		// THIS WILL NEED TO BE DELETED - here for testing
-		ticket.set(optionsObservee.subject.tempInField, new Date('October 4, 2017 6:30').getTime())
-		console.log(ticket.get(optionsObservee.subject.tempInField).subject)
 		// Timer - checkIn Time
 		if(ticket.get(optionsObservee.subject.tempInField).subject === undefined){
 			console.log('tempIn undefined/empty')
 			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
 		} else{
+			// NOT DISPLAYING 
 			console.log('tempIn defined')
-			fp_options.defaultDate = new Date(ticket.get(optionsObservee.subject.tempInField).subject)
+			console.log(new Date(ticket.get(optionsObservee.subject.tempInField).subject))
+			fp_options['defaultDate'] = new Date(ticket.get(optionsObservee.subject.tempInField).subject)
 			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
 		}
 
@@ -199,7 +198,6 @@ registerPlugin(proto(Gem, function(){
 					date.val = ''
 				} else{
 					errorMessage.visible = false
-					// ??? is it better to put this in a separate function outside of build
 					api.User.current().then(function(curUser){
 						var fields = optionsObservee.subject
 						var data = {}
@@ -207,7 +205,6 @@ registerPlugin(proto(Gem, function(){
 						data[fields.subfields.dateField] = new Date(date.val).getTime()
 						data[fields.subfields.minWorkedField] = parseInt(minutes.val)
 						ticket.get(that.tWorkedField).push(data)
-						console.log('data ', data)
 						success.visible = true
 						setTimeout(function(){
 							success.visible = false
@@ -221,48 +218,24 @@ registerPlugin(proto(Gem, function(){
 
 		// Table
 		openButton.on('click', function(){
-			// ??? create table in function outside of build
 			table.header(['USER', 'DATE', 'MINUTES'])
-			console.log('rows ', ticket.get(that.tWorkedField))
 			var rows = ticket.get(that.tWorkedField).subject
-			console.log('rows = ', rows)
-			console.log(rows[0].user + rows[0].date + rows[0].minWorked)
 			rows.forEach(function(row){
-				console.log('minWorked' + row.minWorked)
-				console.log('user ' + row.user)
-				api.User.load(row.user).then(function(users){
-					// that.userName = user[0].displayName()
-					console.log('load user ', row.user)
-					if(row.checkIn === undefined){
+				api.User.loadOne(row.user).then(function(users){
+					if(!('checkIn' in row)){
 						table.row([
-							// Text(that.userName),
-							Text(users[0].subject.name),
+							Text(users.subject.name),
 							Text((new Date(row.date).getMonth()+1) + '-' + new Date(row.date).getDate() + '-' + new Date(row.date).getFullYear()),
 							Text(row.minWorked)
 						])
 					} else{
 						table.row([
-							// Text(that.userName),
-							Text(users[0].subject.name),
+							Text(users.subject.name),
 							Text((new Date(row.checkIn).getMonth()+1) + '-' + new Date(row.checkIn).getDate() + '-' + new Date(row.checkIn).getFullYear()),
 							Text((new Date(row.checkOut) - new Date(row.checkIn))/1000/60)
 						])
 					}
 				}).done()
-
-				// if(ticket.get(that.tWorkedField).subject[i].checkInField === undefined){
-				// 	table.row([
-				// 		Text(that.userName),
-				// 		Text((new Date(rows[i].dateField).getMonth()+1) + '-' + new Date(rows[i].dateField).getDate() + '-' + new Date(rows[i].dateField).getFullYear()),
-				// 		Text(rows[i].minWorkedField)
-				// 	])
-				// } else{
-				// 	table.row([
-				// 		Text(that.userName),
-				// 		Text((new Date(rows[i].checkInField).getMonth()+1) + '-' + new Date(rows[i].checkInField).getDate() + '-' + new Date(rows[i].checkInField).getFullYear()),
-				// 		Text((new Date(rows[i].checkOutField) - new Date(rows[i].checkInField))/1000/60)
-				// 	])
-				// }
 			})
 			table.visible = true
 			closeButton.visible = true
