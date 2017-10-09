@@ -134,6 +134,7 @@ registerPlugin(proto(Gem, function(){
 		openButton.on('click', function(){
 			table.header(['USER', 'DATE', 'MINUTES'])
 			var rows = ticket.get(that.tWorkedField).subject
+			var totalMin = 0
 			rows.forEach(function(row){
 				api.User.loadOne(row.user).then(function(users){
 					if(!('checkIn' in row)){
@@ -142,15 +143,23 @@ registerPlugin(proto(Gem, function(){
 							Text((new Date(row.date).getMonth()+1) + '-' + new Date(row.date).getDate() + '-' + new Date(row.date).getFullYear()),
 							Text(row.minWorked)
 						])
+						totalMin += row.minWorked
 					} else{
 						table.row([
 							Text(users.subject.name),
 							Text((new Date(row.checkIn).getMonth()+1) + '-' + new Date(row.checkIn).getDate() + '-' + new Date(row.checkIn).getFullYear()),
 							Text((new Date(row.checkOut) - new Date(row.checkIn))/1000/60)
 						])
+						totalMin += ((new Date(row.checkOut) - new Date(row.checkIn))/1000/60)
 					}
 				}).done()
 			})
+			if(totalMin < 59){
+				table.row([Text('total', 'Total Time Worked'), Text(''), Text('total', totalMin + ' Minutes')])
+			} else{
+				table.row([Text('total', 'Total Time Worked'), Text(''), Text('total', Math.floor(totalMin/60) + ' Hours ' + (totalMin%60) + ' Minutes')])
+			}
+			// table.row([Text('total', 'Total Time Worked'), Text(''), Text(totalMin)])
 			table.visible = true
 			closeButton.visible = true
 			openButton.visible = false
@@ -222,6 +231,9 @@ registerPlugin(proto(Gem, function(){
 					borderBottom: '1px solid black',
 					textAlign: 'center',
 					width: 150
+				},
+				$total: {
+					fontWeight: 'bold',
 				},
 				display: 'block',
 				marginBottom: 10
