@@ -4,8 +4,6 @@ var flatpickr = require('flatpickr')
 registerPlugin(proto(Gem, function(){
 	this.name = 'TimeTracker'
 
-
-
 	// set ticket field options
 	this.initialize = function(options){
 		return{
@@ -78,10 +76,11 @@ registerPlugin(proto(Gem, function(){
 			console.log('tempIn undefined/empty')
 			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
 		} else{
-			// NOT DISPLAYING 
+			// seems to be mostly working and displaying saved checkIn but not 100% 
 			console.log('tempIn defined')
 			console.log(new Date(ticket.get(optionsObservee.subject.tempInField).subject))
 			fp_options['defaultDate'] = new Date(ticket.get(optionsObservee.subject.tempInField).subject)
+			console.log(fp_options)
 			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
 		}
 
