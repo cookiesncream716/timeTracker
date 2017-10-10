@@ -50,7 +50,9 @@ registerPlugin(proto(Gem, function(){
 		closeButton.visible = false
 		var table = Table()
 		table.visible = false
-		var showTable = Block('div', openButton, table, closeButton)	
+		var tableText = Text('total', 'time worked')
+		tableText.visible = false
+		var showTable = Block('div', openButton, table, tableText, closeButton)	
 
 		// ??? put an if/else to add either timer or duration depending on user setting
 		this.add(timer, duration, showTable)
@@ -156,12 +158,15 @@ registerPlugin(proto(Gem, function(){
 			})
 			Future.all(tRows).then(function(){
 				if(totalMin < 59){
-					table.row([Text('total', 'Total Time Worked'), Text(''), Text('total', totalMin + ' Minutes')])
+					tableText.text = 'Total Time Worked: ' + totalMin + ' Minutes'
+					// table.row([Text('total', 'Total Time Worked'), Text(''), Text('total', totalMin + ' Minutes')])
 				} else{
-					table.row([Text('total', 'Total Time Worked'), Text(''), Text('total', Math.floor(totalMin/60) + ' Hours ' + (totalMin%60) + ' Minutes')])
+					tableText.text = 'Total Time Worked: ' + (Math.floor(totalMin/60)) + ' Hours ' + (totalMin%60) + ' Minutes'
+					// table.row([Text('total', 'Total Time Worked'), Text(''), Text('total', Math.floor(totalMin/60) + ' Hours ' + (totalMin%60) + ' Minutes')])
 				}
 			})
 			table.visible = true
+			tableText.visible = true
 			closeButton.visible = true
 			openButton.visible = false
 			duration.visible = false
@@ -170,6 +175,7 @@ registerPlugin(proto(Gem, function(){
 		})
 		closeButton.on('click', function(){
 			table.visible = false
+			tableText.visible = false
 			closeButton.visible = false
 			openButton.visible = true
 			duration.visible = true
@@ -233,10 +239,11 @@ registerPlugin(proto(Gem, function(){
 					textAlign: 'center',
 					width: 150
 				},
-				$total: {
-					fontWeight: 'bold',
-				},
 				display: 'block',
+				marginBottom: 10
+			},
+			$total: {
+				fontWeight: 'bold',
 				marginBottom: 10
 			},
 			$close: {
