@@ -159,10 +159,8 @@ registerPlugin(proto(Gem, function(){
 			Future.all(tRows).then(function(){
 				if(totalMin < 59){
 					tableText.text = 'Total Time Worked: ' + totalMin + ' Minutes'
-					// table.row([Text('total', 'Total Time Worked'), Text(''), Text('total', totalMin + ' Minutes')])
 				} else{
 					tableText.text = 'Total Time Worked: ' + (Math.floor(totalMin/60)) + ' Hours ' + (totalMin%60) + ' Minutes'
-					// table.row([Text('total', 'Total Time Worked'), Text(''), Text('total', Math.floor(totalMin/60) + ' Hours ' + (totalMin%60) + ' Minutes')])
 				}
 			})
 			table.visible = true
