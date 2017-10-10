@@ -22,11 +22,13 @@ This plugin has the following configuration options:
 The field specified by the `timesWorkedField` option will be a compound list, where each object has an associated `user` and will either have `checkIn` and `checkOut` times or will have a `date` and a number of minutes worked (the `minWorked` field).
 
 Required ticket schema fields (names based on the default configuration options):
+
 |     Name    |   Type   | List | Editiable | Choices | Required |
 |:-----------:|:--------:|:----:|:---------:|:-------:|:--------:|
 | timesWorked | compound |   X  |     X     |         |          |
 
 Subfields of `timesWorked`:
+
 |     Name    |   Type   | List |  Editiable | Choices | Required |
 |:-----------:|:--------:|:----:|:----------:|:-------:|:--------:|
 |     user    |   text   |      |      X     |         |          |
