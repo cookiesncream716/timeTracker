@@ -45,7 +45,7 @@ registerPlugin(proto(Gem, function(){
 		var duration = Block('div', Text('Minutes Worked: '), minutes, Text(' Date: '), date, errorMessage, success)
 
 		// Table
-		var openButton = Button('table')
+		var openButton = Button('Work History')
 		var closeButton = Button('close', 'close')
 		closeButton.visible = false
 		var table = Table()
