@@ -1,6 +1,6 @@
 # Tixit: timeTracker
 
-![Example of TimeTracker](https://github.com/cookiesncream716/timeTracker/blob/master/tTracker.png?raw=true)
+![Example of TimeTracker](https://github.com/cookiesncream716/timeTracker/blob/master/TimeTracker.png?raw=true)
 
 This is a plugin for [Tixit](https://tixit.me/) that allows users to record the time they spend working on a ticket. A user can choose from two options of how to record their time. 
 1. You can use it like a timer, entering a start and stop time, or 
@@ -23,21 +23,20 @@ The field specified by the `timesWorkedField` option will be a compound list, wh
 
 Required ticket schema fields (names based on the default configuration options):
 
-|     Name    |   Type   | List | Editiable | Choices | Required |
-|:-----------:|:--------:|:----:|:---------:|:-------:|:--------:|
-| timesWorked | compound |   X  |     X     |         |          |
+|    Name    |   Type  | List | Initial Value | Editable | Choices | Required |
+|:----------:|:-------:|:----:|:-------------:|:--------:|:-------:|:--------:|
+| timeWorked | compond |   X  |               |     X    |         |          |
+|   tempIn   | integer |      |      none     |     X    |         |          |
 
 Subfields of `timesWorked`:
 
-|     Name    |   Type   | List |  Editiable | Choices | Required |
-|:-----------:|:--------:|:----:|:----------:|:-------:|:--------:|
-|     user    |   text   |      |      X     |         |          |
-|   checkIn   |  integer |      |      X     |         |          |
-|   checkOut  |  integer |      |      X     |         |          |
-|  minWorked  |  integer |      |      X     |         |          |
-|     date    |  integer |      |      X     |         |          |
-|    tempIn   |  integer |      |      X     |         |          |
-
+|    Name   |   Type  | List | Initial Value | Editable | Choices | Required |
+|:---------:|:-------:|:----:|:-------------:|:--------:|:-------:|:--------:|
+|    user   |   text  |      |      none     |     X    |         |          |
+|  checkIn  | integer |      |      none     |     X    |         |          |
+|  checkOut | integer |      |      none     |     X    |         |          |
+| minWorked | integer |      |      none     |     X    |         |          |
+|    date   | integer |      |      none     |     X    |         |          |
 
 ### License
 Released under the MIT license: [http://opensource.org/license/MIT](http://opensource.org/license/MIT)
