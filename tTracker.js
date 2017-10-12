@@ -75,13 +75,9 @@ registerPlugin(proto(Gem, function(){
 
 		// Timer - checkIn Time
 		if(ticket.get(optionsObservee.subject.tempInField).subject === undefined){
-			console.log('tempIn undefined/empty')
 			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
 		} else{
-			console.log('tempIn defined')
-			console.log(new Date(ticket.get(optionsObservee.subject.tempInField).subject))
 			fp_options['defaultDate'] = new Date(ticket.get(optionsObservee.subject.tempInField).subject)
-			console.log(fp_options)
 			var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
 		}
 
