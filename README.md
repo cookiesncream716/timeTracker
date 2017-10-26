@@ -38,5 +38,7 @@ Subfields of `timesWorked`:
 | minWorked | integer |      |      none     |     X    |         |          |
 |    date   | integer |      |      none     |     X    |         |          |
 
+For more information about Tixit plugins go here: [http://docs.tixit.me/d/Plugin_API](http://docs.tixit.me/d/Plugin_API).
+
 ### License
 Released under the MIT license: [http://opensource.org/license/MIT](http://opensource.org/license/MIT)
