@@ -29,7 +29,7 @@ registerPlugin(proto(Gem, function(){
 			type: 'compound',
 			list: true,
 			fields: {
-				user: {type: 'text'},
+				user: {type: 'choice', choices: 'users'},
 				checkIn: {type: 'integer'},
 				checkOut: {type: 'integer'},
 				minWorked: {type: 'integer'},
@@ -40,7 +40,7 @@ registerPlugin(proto(Gem, function(){
 			type: 'compound',
 			list: true,
 			fields: {
-				name: {type: 'text'},
+				name: {type: 'choice', choices: 'users'},
 				in: {type: 'integer'}
 			}
 		}
