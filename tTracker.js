@@ -98,7 +98,7 @@ registerPlugin(proto(Gem, function(){
 
 		// Timer - checkIn Time
 		// check to see if user is in tempInField
-		// ticket.get(this.tempInField).splice(0,1)
+		// ticket.get(this.tempInField).splice(0,2)  // use to get rid of unwanted tempIn data when testing
 		console.log('tempInField ', ticket.get(this.tempInField))
 		if(ticket.get(this.tempInField).subject.length > 0){
 			console.log('checking for user in tempIn')
@@ -180,7 +180,6 @@ registerPlugin(proto(Gem, function(){
 						}, 3000)
 						minutes.val = ''
 						date.val = ''
-						// need to delete user in in tempInField
 					}).done()
 				}
 			}
@@ -273,8 +272,7 @@ registerPlugin(proto(Gem, function(){
 			that.workedText.visible = false
 		}, 5000)
 		return this.api.User.current().then(function(user){
-			console.log('api.User')
-			console.log(that.ticket.get(that.tempInField).subject[index].in)
+			console.log('api.User index=', index, ' ', that.ticket.get(that.tempInField).subject[index].in)
 			var fields = that.optionsObservee.subject
 			var stats = {}
 			stats[fields.subfields.userField] = user.subject._id
@@ -283,9 +281,10 @@ registerPlugin(proto(Gem, function(){
 			that.ticket.get(that.tWorkedField).push(stats)
 			that.checkIn.val = ''
 			that.checkOut.val = ''
+			console.log('tempInField 1 ', that.ticket.get(that.tempInField))
 			ticket.get(that.tempInField).splice(index, 1)
-			console.log('timesWorkedField ', that.ticket.get(that.tWorkedField))
-			console.log('tempInField ', that.ticket.get(that.tempInField))
+			console.log('tempInField 2 ')
+			console.log(that.ticket.get(that.tempInField))
 		})
 	}
 
