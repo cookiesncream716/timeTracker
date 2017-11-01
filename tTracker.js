@@ -13,26 +13,16 @@ registerPlugin(proto(Gem, function(){
 				checkInField: 'checkIn',
 				checkOutField: 'checkOut',
 				minWorkedField: 'minWorked',
-				dateField: 'date'
-			},
-			tempInField: 'tempIn',
-			subfields: {
+				dateField: 'date',
 				nameField: 'name',
 				inField: 'in'
-			}
+			},
+			tempInField: 'tempIn'
 		}
 	}
 
 	this.requireFields = function(options){
 		var result = {}
-		result[options.tempInField] = {
-			type: 'compound',
-			list: true,
-			fields: {
-				name: {type: 'choice', choices: 'Users'},
-				in: {type: 'integer'}
-			}
-		}
 		result[options.timesWorkedField] = {
 			type: 'compound',
 			list: true,
@@ -44,15 +34,14 @@ registerPlugin(proto(Gem, function(){
 				date: {type: 'integer'}
 			}
 		}
-		// result[options.tempInField] = {
-		// 	type: 'compound',
-		// 	list: true,
-		// 	fields: {
-		// 		name: {type: 'choice', choices: 'Users'},
-		// 		in: {type: 'integer'}
-		// 	}
-		// }
-		console.log('results ', result)
+		result[options.tempInField] = {
+			type: 'compound',
+			list: true,
+			fields: {
+				name: {type: 'choice', choices: 'Users'},
+				in: {type: 'integer'}
+			}
+		}
 		return result		
 	}
 
@@ -95,10 +84,6 @@ registerPlugin(proto(Gem, function(){
 		// ??? put an if/else to add either timer or duration depending on user setting
 		this.add(timer, duration, showTable)
 
-		// if(ticket.get(this.tWorkedField).subject === undefined){
-		// 	ticket.set(this.tWorkedField, [])
-		// } 
-
 		// Timer - flatpickr options
 		var fp_options = {
 			enableTime: true,
@@ -117,7 +102,7 @@ registerPlugin(proto(Gem, function(){
 		console.log('tempInField ', ticket.get(this.tempInField))
 		if(ticket.get(this.tempInField).subject.length > 0){
 			console.log('checking for user in tempIn')
-			api.User.current().then(function(user){
+			var next = api.User.current().then(function(user){
 				console.log(ticket.get(that.tempInField).subject)
 				var inSubject = ticket.get(that.tempInField).subject
 				inSubject.forEach(function(sub){
@@ -126,19 +111,15 @@ registerPlugin(proto(Gem, function(){
 						console.log('match ', fp_options['defaultDate'])
 					}
 				})
-				// ??? will it work as for loop so can break out of it ???
-				// for(var i=0; i<ticket.get(that.tempInField).subject.length; i++){
-				// 	console.log('i = ', i, ' ', ticket.get(that.tempInField).subject[i].name)
-				// 	if(user.subject._id === ticket.get(that.tempInField).subject[i].name){
-				// 		fp_options['defaultDate'] = new Date(ticket.get(that.tempInField).subject[i].in)
-				// 		console.log('match ', fp_options['defaultDate'])
-				// 		break
-				// 	}
-				// }
-			}).done()
-			// fp_options['defaultDate'] = new Date(ticket.get(optionsObservee.subject.tempInField).subject)
+			})
+		} else{
+			var next = Future(undefined)
 		}
-		var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
+
+		next.then(function(){
+			var fp_in = new flatpickr(that.checkIn.domNode, fp_options)
+		}).done()
+	
 
 		// Timer - checkOut Time
 		var fp_out = new flatpickr(this.checkOut.domNode, {
@@ -236,15 +217,15 @@ registerPlugin(proto(Gem, function(){
 				} else{
 					tableText.text = 'Total Time Worked: ' + (Math.floor(totalMin/60)) + ' Hours ' + (totalMin%60) + ' Minutes'
 				}
+				table.visible = true
+				tableText.visible = true
+				closeButton.visible = true
+				openButton.visible = false
+				duration.visible = false
+				timer.visible = false
 			}).done()
-			table.visible = true
-			tableText.visible = true
-			closeButton.visible = true
-			openButton.visible = false
-			duration.visible = false
-			timer.visible = false
-
 		})
+
 		closeButton.on('click', function(){
 			table.visible = false
 			tableText.visible = false
@@ -267,7 +248,6 @@ registerPlugin(proto(Gem, function(){
 	// Timer -save checkIn temporarily
 	this.storeIn = function(){
 		var that = this
-		// this.ticket.set(this.optionsObservee.subject.tempInField, new Date(this.checkIn.val).getTime())
 		console.log('in storeIn')
 		return this.api.User.current().then(function(curUser){
 			var fields = that.optionsObservee.subject
@@ -283,7 +263,6 @@ registerPlugin(proto(Gem, function(){
 	this.saveTime = function(index){
 		console.log('saveTime ', index)
 		var that = this
-		// var msWorked = new Date(that.checkOut.val).getTime() - this.ticket.get(this.optionsObservee.subject.tempInField).subject
 		var msWorked = new Date(that.checkOut.val).getTime() - this.ticket.get(this.tempInField).subject[index].in
 		var hours = Math.floor(msWorked/1000/60/60)
 		msWorked -= hours*1000*60*60
@@ -298,13 +277,12 @@ registerPlugin(proto(Gem, function(){
 			console.log(that.ticket.get(that.tempInField).subject[index].in)
 			var fields = that.optionsObservee.subject
 			var stats = {}
-			stats[fields.subfields.userField] = curUser.subject._id
+			stats[fields.subfields.userField] = user.subject._id
 			stats[fields.subfields.checkInField] = that.ticket.get(that.tempInField).subject[index].in
 			stats[fields.subfields.checkOutField] = new Date(that.checkOut.val).getTime()
 			that.ticket.get(that.tWorkedField).push(stats)
 			that.checkIn.val = ''
 			that.checkOut.val = ''
-			// that.ticket.set(that.optionsObservee.subject.tempInField, undefined)
 			ticket.get(that.tempInField).splice(index, 1)
 			console.log('timesWorkedField ', that.ticket.get(that.tWorkedField))
 			console.log('tempInField ', that.ticket.get(that.tempInField))

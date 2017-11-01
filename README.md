@@ -23,20 +23,27 @@ The field specified by the `timesWorkedField` option will be a compound list, wh
 
 Required ticket schema fields (names based on the default configuration options):
 
-|    Name    |   Type  | List | Initial Value | Editable | Choices | Required |
-|:----------:|:-------:|:----:|:-------------:|:--------:|:-------:|:--------:|
-| timeWorked | compond |   X  |               |     X    |         |          |
-|   tempIn   | integer |      |      none     |     X    |         |          |
+|    Name    |   Type   | List | Initial Value | Editable | Choices | Required |
+|:----------:|:--------:|:----:|:-------------:|:--------:|:-------:|:--------:|
+| timeWorked | compound |   X  |               |     X    |         |          |
+|   tempIn   | compound |   X  |               |     X    |         |          |
 
 Subfields of `timesWorked`:
 
 |    Name   |   Type  | List | Initial Value | Editable | Choices | Required |
 |:---------:|:-------:|:----:|:-------------:|:--------:|:-------:|:--------:|
-|    user   |   text  |      |      none     |     X    |         |          |
+|    user   | choice  |      |      none     |     X    |   User  |          |
 |  checkIn  | integer |      |      none     |     X    |         |          |
 |  checkOut | integer |      |      none     |     X    |         |          |
 | minWorked | integer |      |      none     |     X    |         |          |
 |    date   | integer |      |      none     |     X    |         |          |
+
+Subfields of `tempIn`:
+
+| Name |   Type  | List | Initial Value | Editable | Choices | Required |
+|:----:|:-------:|:----:|:-------------:|:--------:|:-------:|:--------:|
+| name |  choice |      |      none     |     X    |   User  |          |
+|  in  | integer |      |      none     |     X    |         |          |
 
 For more information about Tixit plugins go here: [http://docs.tixit.me/d/Plugin_API](http://docs.tixit.me/d/Plugin_API).
 
