@@ -367,7 +367,7 @@ registerPlugin(proto(Gem, function(){
 			that.checkIn.val = ''
 			that.checkOut.val = ''
 			console.log('tempInField 1 ', that.ticket.get(that.tempInField))
-			ticket.get(that.tempInField).splice(index, 1)
+			that.ticket.get(that.tempInField).splice(index, 1)
 			console.log('tempInField 2 ')
 			console.log(that.ticket.get(that.tempInField))
 		})
