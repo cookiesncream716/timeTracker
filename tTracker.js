@@ -29,7 +29,7 @@ registerPlugin(proto(Gem, function(){
 			type: 'compound',
 			list: true,
 			fields: {
-				user: {type: 'choice', choices: 'users'},
+				user: {type: 'choice', choices: 'Users'},
 				checkIn: {type: 'integer'},
 				checkOut: {type: 'integer'},
 				minWorked: {type: 'integer'},
@@ -40,7 +40,7 @@ registerPlugin(proto(Gem, function(){
 			type: 'compound',
 			list: true,
 			fields: {
-				name: {type: 'choice', choices: 'users'},
+				name: {type: 'choice', choices: 'Users'},
 				in: {type: 'integer'}
 			}
 		}
@@ -103,22 +103,29 @@ registerPlugin(proto(Gem, function(){
 		}
 
 		// Timer - checkIn Time
-		// if(ticket.get(optionsObservee.subject.tempInField).subject === undefined){
-		// 	var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
-		// } else{
-		// 	fp_options['defaultDate'] = new Date(ticket.get(optionsObservee.subject.tempInField).subject)
-		// 	var fp_in = new flatpickr(this.checkIn.domNode, fp_options)
-		// }
-		// ticket.get(this.tempInField).splice(0,1)
+		// check to see if user is in tempInField
+		ticket.get(this.tempInField).splice(0,2)
 		console.log('tempInField ', ticket.get(this.tempInField))
 		if(ticket.get(this.tempInField).subject.length > 0){
+			console.log('checking for user in tempIn')
 			api.User.current().then(function(user){
-				for(var i=0; i<ticket.get(that.tempInField).subject.length; i++){
-					if(user.subject._id === ticket.get(that.tempInField).subject[i].name){
-						fp_options['defaultDate'] = new Date(ticket.get(that.tempInField.subject[i].in))
-						break
+				console.log(ticket.get(that.tempInField).subject)
+				var inSubject = ticket.get(that.tempInField).subject
+				inSubject.forEach(function(sub){
+					if(user.subject._id === sub.name){
+						fp_options['defaultDate'] = new Date(sub.in)
+						console.log('match ', fp_options['defaultDate'])
 					}
-				}
+				})
+				// ??? will it work as for loop so can break out of it ???
+				// for(var i=0; i<ticket.get(that.tempInField).subject.length; i++){
+				// 	console.log('i = ', i, ' ', ticket.get(that.tempInField).subject[i].name)
+				// 	if(user.subject._id === ticket.get(that.tempInField).subject[i].name){
+				// 		fp_options['defaultDate'] = new Date(ticket.get(that.tempInField).subject[i].in)
+				// 		console.log('match ', fp_options['defaultDate'])
+				// 		break
+				// 	}
+				// }
 			}).done()
 			// fp_options['defaultDate'] = new Date(ticket.get(optionsObservee.subject.tempInField).subject)
 		}
@@ -133,23 +140,29 @@ registerPlugin(proto(Gem, function(){
 			onClose: function(){
 				// need to get tempIn time for current user then compare it to checkOut.val
 				api.User.current().then(function(curUser){
-					var index = ticket.get(that.tempInField).subject.name.indexOf(curUser.subject._id)
-					if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < ticket.get(that.tempInField).subject[index].in){
+					var index = -1
+					var inSubject = ticket.get(that.tempInField).subject
+					inSubject.forEach(function(sub, i){
+						if(curUser.subject._id === sub.name){
+							index = i
+						}
+					})
+					console.log('index = ', index)
+					console.log(ticket.get(that.tempInField).subject)
+					if(index === -1){
+						console.log('if')
+						errMessage.visible = true
+						that.checkOut.val = ''
+					} else if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < ticket.get(that.tempInField).subject[index].in){
+						console.log('else if')
 						errMessage.visible = true
 						that.checkOut.val = ''
 					} else{
-						errMessage = false
+						console.log('else')
+						errMessage.visible = false
 						that.saveTime(index)
 					}
 				}).done()
-
-				// if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < ticket.get(optionsObservee.subject.tempInField).subject){
-				// 	errMessage.visible = true
-				// 	that.checkOut.val = ''
-				// } else{
-				// 	errMessage.visible = false
-				// 	that.saveTime().done()
-				// }
 			}
 		})
 
@@ -246,18 +259,20 @@ registerPlugin(proto(Gem, function(){
 	this.storeIn = function(){
 		var that = this
 		// this.ticket.set(this.optionsObservee.subject.tempInField, new Date(this.checkIn.val).getTime())
+		console.log('in storeIn')
 		return this.api.User.current().then(function(curUser){
 			var fields = that.optionsObservee.subject
 			var info = {}
 			info[fields.subfields.nameField] = curUser.subject._id
 			info[fields.subfields.inField] = new Date(that.checkIn.val).getTime()
 			that.ticket.get(that.tempInField).push(info)
-			console.log('storeIn tempIn= ' , this.ticket.get(this.tempInField))
+			console.log('storeIn tempIn= ' , that.ticket.get(that.tempInField))
 		})
 	}
 
 	// Timer - find how long worked and save everything to ticket
 	this.saveTime = function(index){
+		console.log('saveTime ', index)
 		var that = this
 		// var msWorked = new Date(that.checkOut.val).getTime() - this.ticket.get(this.optionsObservee.subject.tempInField).subject
 		var msWorked = new Date(that.checkOut.val).getTime() - this.ticket.get(this.tempInField).subject[index].in
@@ -270,16 +285,19 @@ registerPlugin(proto(Gem, function(){
 			that.workedText.visible = false
 		}, 5000)
 		return this.api.User.current().then(function(user){
+			console.log('api.User')
 			var fields = that.optionsObservee.subject
-			var info = {}
-			info[fields.subfields.userField] = user.subject._id
-			info[fields.subfields.checkInField] = that.ticket.get(that.tempInField).subject[index].in
-			info[fields.subfields.checkOutField] = new Date(that.checkOut.val).getTime()
-			that.ticket.get(that.tWorkedField).push(info)
+			var stats = {}
+			stats[fields.subfields.userField] = user.subject._id
+			stats[fields.subfields.checkInField] = that.ticket.get(that.tempInField).subject[index].in
+			stats[fields.subfields.checkOutField] = new Date(that.checkOut.val).getTime()
+			that.ticket.get(that.tWorkedField).push(stats)
 			that.checkIn.val = ''
 			that.checkOut.val = ''
 			// that.ticket.set(that.optionsObservee.subject.tempInField, undefined)
 			ticket.get(that.tempInField).splice(index, 1)
+			console.log('timesWorkedField ', that.ticket.get(that.tWorkedField))
+			console.log('tempInField ', that.ticket.get(that.tempInField))
 		})
 	}
 
