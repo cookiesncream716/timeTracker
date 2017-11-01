@@ -16,7 +16,9 @@ This plugin has the following configuration options:
   * ***`checkInField`*** - The name of the sub-field used to store the check in time.
   * ***`checkOutField`*** - The name of the sub-field used to store the check out time.
   * ***`dateField`*** - The name of the sub-field used to store the date a user worked a number of minutes.
-  * ***`minWorkedField`*** - The name of the sub-field used to store the number of minutes worked at a given date.  
+  * ***`minWorkedField`*** - The name of the sub-field used to store the number of minutes worked at a given date.
+  * ***`nameField`*** - The name of the sub-field of `tempInField` used to store the user `_id` of the user recording their time.
+  * ***`inField`*** - The name of the sub-field of `tempInField` used to store the starting time. 
 * ***`tempInField`*** - The field used to store the start time so the user can check-in, work on the ticket, and then enter the stop time.
 
 The field specified by the `timesWorkedField` option will be a compound list, where each object has an associated `user` and will either have `checkIn` and `checkOut` times or will have a `date` and a number of minutes worked (the `minWorked` field).
