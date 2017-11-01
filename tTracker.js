@@ -25,6 +25,14 @@ registerPlugin(proto(Gem, function(){
 
 	this.requireFields = function(options){
 		var result = {}
+		result[options.tempInField] = {
+			type: 'compound',
+			list: true,
+			fields: {
+				name: {type: 'choice', choices: 'Users'},
+				in: {type: 'integer'}
+			}
+		}
 		result[options.timesWorkedField] = {
 			type: 'compound',
 			list: true,
@@ -36,14 +44,15 @@ registerPlugin(proto(Gem, function(){
 				date: {type: 'integer'}
 			}
 		}
-		result[options.tempInField] = {
-			type: 'compound',
-			list: true,
-			fields: {
-				name: {type: 'choice', choices: 'Users'},
-				in: {type: 'integer'}
-			}
-		}
+		// result[options.tempInField] = {
+		// 	type: 'compound',
+		// 	list: true,
+		// 	fields: {
+		// 		name: {type: 'choice', choices: 'Users'},
+		// 		in: {type: 'integer'}
+		// 	}
+		// }
+		console.log('results ', result)
 		return result		
 	}
 
@@ -104,7 +113,7 @@ registerPlugin(proto(Gem, function(){
 
 		// Timer - checkIn Time
 		// check to see if user is in tempInField
-		ticket.get(this.tempInField).splice(0,2)
+		// ticket.get(this.tempInField).splice(0,1)
 		console.log('tempInField ', ticket.get(this.tempInField))
 		if(ticket.get(this.tempInField).subject.length > 0){
 			console.log('checking for user in tempIn')
@@ -286,9 +295,10 @@ registerPlugin(proto(Gem, function(){
 		}, 5000)
 		return this.api.User.current().then(function(user){
 			console.log('api.User')
+			console.log(that.ticket.get(that.tempInField).subject[index].in)
 			var fields = that.optionsObservee.subject
 			var stats = {}
-			stats[fields.subfields.userField] = user.subject._id
+			stats[fields.subfields.userField] = curUser.subject._id
 			stats[fields.subfields.checkInField] = that.ticket.get(that.tempInField).subject[index].in
 			stats[fields.subfields.checkOutField] = new Date(that.checkOut.val).getTime()
 			that.ticket.get(that.tWorkedField).push(stats)
