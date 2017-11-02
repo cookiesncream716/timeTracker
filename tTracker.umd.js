@@ -150,7 +150,7 @@ registerPlugin(proto(Gem, function(){
 		// Duration
 		var minutes = TextField()
 		var date = TextField()
-		var errorMessage = Text('error', 'Minutes Worked must be a number and Date cannot be empty')
+		var errorMessage = Text('error', 'there has been an error')
 		errorMessage.visible = false
 		var success = Text('Your Time Has Been Recorded')
 		success.visible = false
@@ -183,17 +183,12 @@ registerPlugin(proto(Gem, function(){
 
 		// Timer - checkIn Time
 		// check to see if user is in tempInField
-		// ticket.get(this.tempInField).splice(0,2)  // use to get rid of unwanted tempIn data when testing
-		console.log('tempInField ', ticket.get(this.tempInField))
 		if(ticket.get(this.tempInField).subject.length > 0){
-			console.log('checking for user in tempIn')
 			var next = api.User.current().then(function(user){
-				console.log(ticket.get(that.tempInField).subject)
 				var inSubject = ticket.get(that.tempInField).subject
 				inSubject.forEach(function(sub){
 					if(user.subject._id === sub.name){
 						fp_options['defaultDate'] = new Date(sub.in)
-						console.log('match ', fp_options['defaultDate'])
 					}
 				})
 			})
@@ -222,18 +217,15 @@ registerPlugin(proto(Gem, function(){
 							index = i
 						}
 					})
-					console.log('index = ', index)
-					console.log(ticket.get(that.tempInField).subject)
 					if(index === -1){
-						console.log('if')
+						errMessage.text = 'Please enter a Start Time before entering an End Time'
 						errMessage.visible = true
 						that.checkOut.val = ''
 					} else if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < ticket.get(that.tempInField).subject[index].in){
-						console.log('else if')
+						errMessage.text = 'Minutes Worked must be a number and Date cannot be empty'
 						errMessage.visible = true
 						that.checkOut.val = ''
 					} else{
-						console.log('else')
 						errMessage.visible = false
 						that.saveTime(index)
 					}
@@ -332,20 +324,17 @@ registerPlugin(proto(Gem, function(){
 	// Timer -save checkIn temporarily
 	this.storeIn = function(){
 		var that = this
-		console.log('in storeIn')
 		return this.api.User.current().then(function(curUser){
 			var fields = that.optionsObservee.subject
 			var info = {}
 			info[fields.subfields.nameField] = curUser.subject._id
 			info[fields.subfields.inField] = new Date(that.checkIn.val).getTime()
 			that.ticket.get(that.tempInField).push(info)
-			console.log('storeIn tempIn= ' , that.ticket.get(that.tempInField))
 		})
 	}
 
 	// Timer - find how long worked and save everything to ticket
 	this.saveTime = function(index){
-		console.log('saveTime ', index)
 		var that = this
 		var msWorked = new Date(that.checkOut.val).getTime() - this.ticket.get(this.tempInField).subject[index].in
 		var hours = Math.floor(msWorked/1000/60/60)
@@ -357,7 +346,6 @@ registerPlugin(proto(Gem, function(){
 			that.workedText.visible = false
 		}, 5000)
 		return this.api.User.current().then(function(user){
-			console.log('api.User index=', index, ' ', that.ticket.get(that.tempInField).subject[index].in)
 			var fields = that.optionsObservee.subject
 			var stats = {}
 			stats[fields.subfields.userField] = user.subject._id
@@ -366,10 +354,7 @@ registerPlugin(proto(Gem, function(){
 			that.ticket.get(that.tWorkedField).push(stats)
 			that.checkIn.val = ''
 			that.checkOut.val = ''
-			console.log('tempInField 1 ', that.ticket.get(that.tempInField))
 			that.ticket.get(that.tempInField).splice(index, 1)
-			console.log('tempInField 2 ')
-			console.log(that.ticket.get(that.tempInField))
 		})
 	}
 

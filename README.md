@@ -10,18 +10,20 @@ If you input a start time, that time will be saved so you can come back and inpu
 
 This plugin has the following configuration options:
 
-* ***`timesWorkedField`*** - The name of the compound field to store the list of work durations. 
-* ***`subfields`*** - An object containing the names of sub-fields to the `timesWorkedField`:
-  * ***`userField`*** - The name of the sub-field used to store the user `_id` of the user recording their time.
-  * ***`checkInField`*** - The name of the sub-field used to store the check in time.
-  * ***`checkOutField`*** - The name of the sub-field used to store the check out time.
-  * ***`dateField`*** - The name of the sub-field used to store the date a user worked a number of minutes.
-  * ***`minWorkedField`*** - The name of the sub-field used to store the number of minutes worked at a given date.
+* ***`timesWorkedField`*** - The name of the compound field to store the list of work durations.
+* ***`tempInField`*** - The field used to store the start time so the user can check-in, work on the ticket, and then enter the stop time. 
+* ***`subfields`*** - An object containing the names of sub-fields to the `timesWorkedField` and `tempInField`:
+  * ***`userField`*** - The name of the sub-field of `timesWorkedField` used to store the user `_id` of the user recording their time.
+  * ***`checkInField`*** - The name of the sub-field of `timesWorkedField` used to store the check in time.
+  * ***`checkOutField`*** - The name of the sub-field of `timesWorkedField` used to store the check out time.
+  * ***`dateField`*** - The name of the sub-field of `timesWorkedField` used to store the date a user worked a number of minutes.
+  * ***`minWorkedField`*** - The name of the sub-field of `timesWorkedField` used to store the number of minutes worked at a given date.
   * ***`nameField`*** - The name of the sub-field of `tempInField` used to store the user `_id` of the user recording their time.
   * ***`inField`*** - The name of the sub-field of `tempInField` used to store the starting time. 
-* ***`tempInField`*** - The field used to store the start time so the user can check-in, work on the ticket, and then enter the stop time.
 
 The field specified by the `timesWorkedField` option will be a compound list, where each object has an associated `user` and will either have `checkIn` and `checkOut` times or will have a `date` and a number of minutes worked (the `minWorked` field).
+
+The field specified by the `tempInField` option will also be a compound list, where each has an associateted `name` and `in` time.
 
 Required ticket schema fields (names based on the default configuration options):
 
