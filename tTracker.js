@@ -15,9 +15,12 @@ registerPlugin(proto(Gem, function(){
 				minWorkedField: 'minWorked',
 				dateField: 'date',
 				nameField: 'name',
-				inField: 'in'
+				inField: 'in',
+				timerInputField: 'timer',
+				durationInputField: 'duration'
 			},
-			tempInField: 'tempIn'
+			tempInField: 'tempIn',
+			inputField: 'input'
 		}
 	}
 
@@ -42,6 +45,14 @@ registerPlugin(proto(Gem, function(){
 				in: {type: 'integer'}
 			}
 		}
+		reustl[options.inputField] = {
+			type: 'compound',
+			list: true,
+			fields: {
+				timerInputField: {type: 'choice', initial: true, choices: 'true/false'},
+				durationInputField: {type: 'choice', initial: true, choices: 'true/false'}
+			}
+		}
 		return result		
 	}
 
@@ -52,6 +63,12 @@ registerPlugin(proto(Gem, function(){
 		this.tWorkedField = optionsObservee.subject.timesWorkedField
 		this.tempInField = optionsObservee.subject.tempInField
 		var that = this
+
+		// Select default input
+		var selectTimer = CheckBox()
+		var selectDuration = CheckBox()
+		var selectInput = Block(Text('Select a default input method'), selectTimer, Text('Timer'), selectDuration, Text('Duration'))
+		selectInput.visible = false
 
 		// Timer
 		this.checkIn = TextField()
@@ -82,7 +99,8 @@ registerPlugin(proto(Gem, function(){
 		var showTable = Block('div', openButton, table, tableText, closeButton)	
 
 		// ??? put an if/else to add either timer or duration depending on user setting
-		this.add(timer, duration, showTable)
+		var inputSetting = Image(require('url-loader!./settingsGear.png'))
+		this.add(inputSetting, selectInput, timer, duration, showTable)
 
 		// Timer - flatpickr options
 		var fp_options = {
@@ -227,6 +245,14 @@ registerPlugin(proto(Gem, function(){
 			table.remove(table.children)
 		})
 
+		// Input Settings
+		inputSetting.on('click', function(){
+			selectInput.visible = true
+			timer.visible = false
+			duration.visible = false
+			showTable.visible = false
+		})
+
 		// css stylesheet for flatpickr
 		this.on('attach', function(){
 			var flatpickrStylesheet = require('raw-loader!flatpickr/dist/flatpickr.min.css')
@@ -278,7 +304,10 @@ registerPlugin(proto(Gem, function(){
 			$div: {
 				display: 'block',
 				padding: 10,
-				// fontFamily: 'Open Sans, sans-serif'
+			},
+			Image: {
+				width: '5%',
+				marginLeft: '90%'
 			},
 			$error: {
 				color: 'red',
