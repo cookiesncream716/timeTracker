@@ -143,7 +143,7 @@ registerPlugin(proto(Gem, function(){
 		this.checkOut = TextField()
 		this.workedText = Text()
 		this.workedText.visible = false
-		var errMessage = Text('error', 'Your End Time must be later than your Start Time')
+		var errMessage = Text('error', 'error message')
 		errMessage.visible = false
 		var timer = Block('div', Text('Start Time: '), this.checkIn, Text(' End Time: '), this.checkOut, errMessage, this.workedText)
 
@@ -177,12 +177,20 @@ registerPlugin(proto(Gem, function(){
 			maxDate: 'today',
 			defaultDate: null,
 			onClose: function(){
-				that.storeIn()
+				if(Number.isInteger(new Date(that.checkIn.val).getTime()) === false){
+					errMessage.text = 'Please enter a date and time'
+					errMessage.visible = true
+					that.checkIn.val = ''
+				} else{
+					that.storeIn()
+					errMessage.visible = false
+				}
 			}
 		}
 
 		// Timer - checkIn Time
 		// check to see if user is in tempInField
+		// ticket.get(this.tempInField).splice(0,2)  // to get rid of bad data
 		console.log('tempInField ',ticket.get(this.tempInField).subject)
 		if(ticket.get(this.tempInField).subject.length > 0){
 			console.log('inField > 0')
