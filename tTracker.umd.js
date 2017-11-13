@@ -100,12 +100,11 @@ registerPlugin(proto(Gem, function(){
 				minWorkedField: 'minWorked',
 				dateField: 'date',
 				nameField: 'name',
-				inField: 'in',
-				timerInputField: 'timer',
-				durationInputField: 'duration'
+				inField: 'in'
 			},
 			tempInField: 'tempIn',
-			inputField: 'input'
+			timerInputField: 'timer',
+			durationInputField: 'duration'
 		}
 	}
 
@@ -130,14 +129,14 @@ registerPlugin(proto(Gem, function(){
 				in: {type: 'integer'}
 			}
 		}
-		reustl[options.inputField] = {
-			type: 'compound',
-			list: true,
-			fields: {
-				timerInputField: {type: 'choice', initial: true, choices: 'true/false'},
-				durationInputField: {type: 'choice', initial: true, choices: 'true/false'}
-			}
-		}
+		// reustl[options.inputField] = {
+		// 	type: 'compound',
+		// 	list: true,
+		// 	fields: {
+		// 		timerInputField: {type: 'choice', initial: true, choices: 'true/false'},
+		// 		durationInputField: {type: 'choice', initial: true, choices: 'true/false'}
+		// 	}
+		// }
 		return result		
 	}
 
@@ -147,12 +146,26 @@ registerPlugin(proto(Gem, function(){
 		this.optionsObservee = optionsObservee
 		this.tWorkedField = optionsObservee.subject.timesWorkedField
 		this.tempInField = optionsObservee.subject.tempInField
+		this.timerInputField = optionsObservee.subject.timerInputField
+		this.durationInputField = optionsObservee.subject.durationInputField
 		var that = this
 
-		// Select default input
+		// Default Input
 		var selectTimer = CheckBox()
+		console.log(selectTimer.selected)
+		if(ticket.get(this.timerInputField).subject === true){
+			selectTimer.selected = true
+		} else{
+			selectTimer.selected = false
+		}
 		var selectDuration = CheckBox()
-		var selectInput = Block(Text('Select a default input method'), selectTimer, Text('Timer'), selectDuration, Text('Duration'))
+		if(ticket.get(this.durationInputField).subject === true){
+			selectDuration.selected = true
+		} else{
+			selectDuration.selected = false
+		}
+		var closeInput = Button('close')
+		var selectInput = Block(Text('Select a default input method'), selectTimer, Text('Timer'), selectDuration, Text('Duration'), closeInput)
 		selectInput.visible = false
 
 		// Timer
@@ -330,12 +343,38 @@ registerPlugin(proto(Gem, function(){
 			table.remove(table.children)
 		})
 
-		// Input Settings
+		// Default Input
 		inputSetting.on('click', function(){
 			selectInput.visible = true
 			timer.visible = false
 			duration.visible = false
 			showTable.visible = false
+			inputSetting.visible = false
+		})
+		console.log('timer status ', ticket.get(that.timerInputField))
+		selectTimer.on('change', function(){
+			console.log('timer method')
+			if(ticket.get(that.timerInputField).subject === true){
+				ticket.set(that.timerInputField, false)
+			} else{
+				ticket.set(that.timerInputField, true)
+			}
+		})
+		console.log('duration status ', ticket.get(that.durationInputField))
+		selectDuration.on('change', function(){
+			console.log('duration method')
+			if(ticket.get(that.durationInputField).subject === true){
+				ticket.set(that.durationInputField, false)
+			} else{
+				ticket.set(that.durationInputField, true)
+			}
+		})
+
+		closeInput.on('click', function(){
+			selectInput.visible = false
+			timer.visible = true
+			duration.visible = true
+			inputSetting.visible = true
 		})
 
 		// css stylesheet for flatpickr
