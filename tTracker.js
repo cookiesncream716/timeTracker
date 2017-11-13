@@ -98,7 +98,9 @@ registerPlugin(proto(Gem, function(){
 
 		// Timer - checkIn Time
 		// check to see if user is in tempInField
+		console.log('tempInField ',ticket.get(this.tempInField).subject)
 		if(ticket.get(this.tempInField).subject.length > 0){
+			console.log('inField > 0')
 			var next = api.User.current().then(function(user){
 				var inSubject = ticket.get(that.tempInField).subject
 				inSubject.forEach(function(sub){
@@ -110,9 +112,12 @@ registerPlugin(proto(Gem, function(){
 		} else{
 			var next = Future(undefined)
 		}
-
+		console.log('options ',fp_options)
 		next.then(function(){
+			// Should not need to put in checkIn.val=; Flatpickr should set it but it is not showing in box.
+			that.checkIn.val = fp_options['defaultDate']
 			var fp_in = new flatpickr(that.checkIn.domNode, fp_options)
+			console.log('checkIn.val = ', that.checkIn.val)
 		}).done()
 	
 
@@ -123,7 +128,7 @@ registerPlugin(proto(Gem, function(){
 			minuteIncrement: 1,
 			maxDate: 'today',
 			onClose: function(){
-				// need to get tempIn time for current user then compare it to checkOut.val
+				// Get tempIn time for current user then compare it to checkOut.val
 				api.User.current().then(function(curUser){
 					var index = -1
 					var inSubject = ticket.get(that.tempInField).subject
@@ -136,8 +141,8 @@ registerPlugin(proto(Gem, function(){
 						errMessage.text = 'Please enter a Start Time before entering an End Time'
 						errMessage.visible = true
 						that.checkOut.val = ''
-					} else if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < ticket.get(that.tempInField).subject[index].in){
-						errMessage.text = 'Minutes Worked must be a number and Date cannot be empty'
+					} else if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() <= ticket.get(that.tempInField).subject[index].in){
+						errMessage.text = 'End Time cannot be empty and cannot be before Start Time'
 						errMessage.visible = true
 						that.checkOut.val = ''
 					} else{
