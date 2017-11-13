@@ -67,7 +67,6 @@ registerPlugin(proto(Gem, function(){
 
 		// Default Input
 		var selectTimer = CheckBox()
-		console.log(selectTimer.selected)
 		if(ticket.get(this.timerInputField).subject === true){
 			selectTimer.selected = true
 		} else{
@@ -90,7 +89,7 @@ registerPlugin(proto(Gem, function(){
 		this.workedText.visible = false
 		var errMessage = Text('error', 'Your End Time must be later than your Start Time')
 		errMessage.visible = false
-		var timer = Block('div', Text('Start Time: '), this.checkIn, Text(' End Time: '), this.checkOut, errMessage, this.workedText)
+		this.timer = Block('div', Text('Start Time: '), this.checkIn, Text(' End Time: '), this.checkOut, errMessage, this.workedText)
 
 		// Duration
 		var minutes = TextField()
@@ -99,7 +98,7 @@ registerPlugin(proto(Gem, function(){
 		errorMessage.visible = false
 		var success = Text('Your Time Has Been Recorded')
 		success.visible = false
-		var duration = Block('div', Text('Minutes Worked: '), minutes, Text(' Date: '), date, errorMessage, success)
+		this.duration = Block('div', Text('Minutes Worked: '), minutes, Text(' Date: '), date, errorMessage, success)
 
 		// Table
 		var openButton = Button('Work History')
@@ -113,7 +112,8 @@ registerPlugin(proto(Gem, function(){
 
 		// ??? put an if/else to add either timer or duration depending on user setting
 		var inputSetting = Image(require('url-loader!./settingsGear.png'))
-		this.add(inputSetting, selectInput, timer, duration, showTable)
+		this.settings()
+		this.add(inputSetting, selectInput, this.timer, this.duration, showTable)
 
 		// Timer - flatpickr options
 		var fp_options = {
@@ -243,8 +243,8 @@ registerPlugin(proto(Gem, function(){
 				tableText.visible = true
 				closeButton.visible = true
 				openButton.visible = false
-				duration.visible = false
-				timer.visible = false
+				this.duration.visible = false
+				this.timer.visible = false
 			}).done()
 		})
 
@@ -253,16 +253,16 @@ registerPlugin(proto(Gem, function(){
 			tableText.visible = false
 			closeButton.visible = false
 			openButton.visible = true
-			duration.visible = true
-			timer.visible = true
+			this.duration.visible = true
+			this.timer.visible = true
 			table.remove(table.children)
 		})
 
 		// Default Input
 		inputSetting.on('click', function(){
 			selectInput.visible = true
-			timer.visible = false
-			duration.visible = false
+			that.timer.visible = false
+			that.duration.visible = false
 			showTable.visible = false
 			inputSetting.visible = false
 		})
@@ -287,9 +287,10 @@ registerPlugin(proto(Gem, function(){
 
 		closeInput.on('click', function(){
 			selectInput.visible = false
-			timer.visible = true
-			duration.visible = true
+			// that.timer.visible = true
+			// that.duration.visible = true
 			inputSetting.visible = true
+			that.settings()
 		})
 
 		// css stylesheet for flatpickr
@@ -336,6 +337,20 @@ registerPlugin(proto(Gem, function(){
 			that.checkOut.val = ''
 			that.ticket.get(that.tempInField).splice(index, 1)
 		})
+	}
+
+	this.settings = function(){
+		if(this.ticket.get(this.timerInputField).subject === true){
+			this.timer.visible = true
+		} else{
+			this.timer.visible = false
+		}
+		if(this.ticket.get(this.durationInputField).subject === true){
+			this.duration.visible = true
+		} else{
+			this.duration.visible = false
+		}
+
 	}
 
 	this.getStyle = function(){
