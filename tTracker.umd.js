@@ -163,8 +163,8 @@ registerPlugin(proto(Gem, function(){
 		} else{
 			selectDuration.selected = false
 		}
-		var closeInput = Button('close')
-		var selectInput = Block(Text('Select a default input method'), selectTimer, Text('Timer'), selectDuration, Text('Duration'), closeInput)
+		var closeInput = Button('close', 'close')
+		var selectInput = Block(Text('Select a default input method '), selectTimer, Text('Timer '), selectDuration, Text('Duration'), closeInput)
 		selectInput.visible = false
 
 		// Timer
@@ -195,8 +195,8 @@ registerPlugin(proto(Gem, function(){
 		tableText.visible = false
 		var showTable = Block('div', openButton, table, tableText, closeButton)	
 
-		// ??? put an if/else to add either timer or duration depending on user setting
 		var inputSetting = Image(__webpack_require__(/*! url-loader!./settingsGear.png */ 2))
+		// check for input method settings
 		this.settings()
 		this.add(inputSetting, selectInput, this.timer, this.duration, showTable)
 
@@ -239,7 +239,7 @@ registerPlugin(proto(Gem, function(){
 			minuteIncrement: 1,
 			maxDate: 'today',
 			onClose: function(){
-				// need to get tempIn time for current user then compare it to checkOut.val
+				// Get tempIn time for current user then compare it to checkOut.val
 				api.User.current().then(function(curUser){
 					var index = -1
 					var inSubject = ticket.get(that.tempInField).subject
@@ -372,8 +372,6 @@ registerPlugin(proto(Gem, function(){
 
 		closeInput.on('click', function(){
 			selectInput.visible = false
-			// that.timer.visible = true
-			// that.duration.visible = true
 			inputSetting.visible = true
 			that.settings()
 		})
