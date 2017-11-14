@@ -44,14 +44,16 @@ registerPlugin(proto(Gem, function(){
 				in: {type: 'integer'}
 			}
 		}
-		// reustl[options.inputField] = {
-		// 	type: 'compound',
-		// 	list: true,
-		// 	fields: {
-		// 		timerInputField: {type: 'choice', initial: true, choices: 'true/false'},
-		// 		durationInputField: {type: 'choice', initial: true, choices: 'true/false'}
-		// 	}
-		// }
+		result[options.timerInputField] = {
+			type: 'choice',
+			initial: true,
+			choices: 'true/false'
+		}
+		result[options.durationInputField] = {
+			type: 'choice',
+			initial: true,
+			choices: 'true/false'
+		}
 		return result		
 	}
 
