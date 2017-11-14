@@ -152,7 +152,7 @@ registerPlugin(proto(Gem, function(){
 		this.durationInputField = optionsObservee.subject.durationInputField
 		var that = this
 
-		// Default Input
+		// Default Input Method
 		var selectTimer = CheckBox()
 		if(ticket.get(this.timerInputField).subject === true){
 			selectTimer.selected = true
@@ -181,21 +181,21 @@ registerPlugin(proto(Gem, function(){
 		// Duration
 		var minutes = TextField()
 		var date = TextField()
-		var errorMessage = Text('error', 'there has been an error')
+		var errorMessage = Text('error', 'You must enter a number for Minutes Worked and a Date')
 		errorMessage.visible = false
 		var success = Text('Your Time Has Been Recorded')
 		success.visible = false
 		this.duration = Block('div', Text('Minutes Worked: '), minutes, Text(' Date: '), date, errorMessage, success)
 
 		// Table
-		var openButton = Button('Work History')
-		var closeButton = Button('close', 'close')
-		closeButton.visible = false
+		var openTable = Button('Work History')
+		var closeTable = Button('close', 'close')
+		closeTable.visible = false
 		var table = Table()
 		table.visible = false
 		var tableText = Text('total', 'time worked')
 		tableText.visible = false
-		var showTable = Block('div', openButton, table, tableText, closeButton)	
+		var showTable = Block('div', openTable, table, tableText, closeTable)	
 
 		var inputSetting = Image(__webpack_require__(/*! url-loader!./settingsGear.png */ 2))
 		// check for input method settings
@@ -241,7 +241,7 @@ registerPlugin(proto(Gem, function(){
 			minuteIncrement: 1,
 			maxDate: 'today',
 			onClose: function(){
-				// Get tempIn time for current user then compare it to checkOut.val
+				// get tempIn time for current user then compare it to checkOut.val
 				api.User.current().then(function(curUser){
 					var index = -1
 					var inSubject = ticket.get(that.tempInField).subject
@@ -255,7 +255,7 @@ registerPlugin(proto(Gem, function(){
 						errMessage.visible = true
 						that.checkOut.val = ''
 					} else if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < ticket.get(that.tempInField).subject[index].in){
-						errMessage.text = 'Minutes Worked must be a number and Date cannot be empty'
+						errMessage.text = 'Please enter an End Time that is later than the Start Time'
 						errMessage.visible = true
 						that.checkOut.val = ''
 					} else{
@@ -296,7 +296,8 @@ registerPlugin(proto(Gem, function(){
 		})
 
 		// Table
-		openButton.on('click', function(){
+		openTable.on('click', function(){
+			inputSetting.visible = false
 			table.header(['USER', 'DATE', 'MINUTES'])
 			var rows = ticket.get(that.tWorkedField).subject
 			var totalMin = 0
@@ -328,24 +329,26 @@ registerPlugin(proto(Gem, function(){
 				}
 				table.visible = true
 				tableText.visible = true
-				closeButton.visible = true
-				openButton.visible = false
-				this.duration.visible = false
-				this.timer.visible = false
+				closeTable.visible = true
+				openTable.visible = false
+				that.duration.visible = false
+				that.timer.visible = false
 			}).done()
 		})
 
-		closeButton.on('click', function(){
+		closeTable.on('click', function(){
 			table.visible = false
 			tableText.visible = false
-			closeButton.visible = false
-			openButton.visible = true
-			this.duration.visible = true
-			this.timer.visible = true
+			closeTable.visible = false
+			openTable.visible = true
+			that.duration.visible = true
+			that.timer.visible = true
+			inputSetting.visible = true
 			table.remove(table.children)
+			that.settings()
 		})
 
-		// Default Input
+		// Default Input Method
 		inputSetting.on('click', function(){
 			selectInput.visible = true
 			that.timer.visible = false
@@ -353,18 +356,16 @@ registerPlugin(proto(Gem, function(){
 			showTable.visible = false
 			inputSetting.visible = false
 		})
-		console.log('timer status ', ticket.get(that.timerInputField))
+		
 		selectTimer.on('change', function(){
-			console.log('timer method')
 			if(ticket.get(that.timerInputField).subject === true){
 				ticket.set(that.timerInputField, false)
 			} else{
 				ticket.set(that.timerInputField, true)
 			}
 		})
-		console.log('duration status ', ticket.get(that.durationInputField))
+		
 		selectDuration.on('change', function(){
-			console.log('duration method')
 			if(ticket.get(that.durationInputField).subject === true){
 				ticket.set(that.durationInputField, false)
 			} else{
@@ -375,6 +376,7 @@ registerPlugin(proto(Gem, function(){
 		closeInput.on('click', function(){
 			selectInput.visible = false
 			inputSetting.visible = true
+			showTable.visible = true
 			that.settings()
 		})
 
