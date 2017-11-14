@@ -228,8 +228,10 @@ registerPlugin(proto(Gem, function(){
 		} else{
 			var next = Future(undefined)
 		}
-
+		console.log('options ', fp_options)
 		next.then(function(){
+			// should not need to put in checkIn.val =; Flatpickr should set it but it is not showing in box.
+			that.checkIn.val = fp_options['defaultDate']
 			var fp_in = new flatpickr(that.checkIn.domNode, fp_options)
 		}).done()
 	
