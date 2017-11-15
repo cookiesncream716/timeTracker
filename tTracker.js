@@ -51,12 +51,12 @@ registerPlugin(proto(Gem, function(){
 			type: 'compound',
 			list: true,
 			fields: {
-				workerField: {type: 'choice', choices: 'Users'},
+				workerField: {type: 'choice', initial: 'curUser', choices: 'Users'},
 				timerInputField: {type: 'choice', initial: true, choices: [true, false]},
 				durationInputField: {type: 'choice', initial: true, choices: [true, false]}
 			}
 		}
-		return result		
+		return result
 	}
 
 	this.build = function(ticket, optionsObservee, api){
@@ -65,9 +65,9 @@ registerPlugin(proto(Gem, function(){
 		this.optionsObservee = optionsObservee
 		this.tWorkedField = optionsObservee.subject.timesWorkedField
 		this.tempInField = optionsObservee.subject.tempInField
-		this.timerInputField = optionsObservee.subject.timerInputField
-		this.durationInputField = optionsObservee.subject.durationInputField
+		this.settingsField = optionsObservee.subject.settingsField
 		var that = this
+		console.log('settings ', ticket.get(this.settingsField))
 
 		// Default Input Method
 		var selectTimer = CheckBox()
@@ -277,19 +277,11 @@ registerPlugin(proto(Gem, function(){
 		})
 		
 		selectTimer.on('change', function(){
-			if(ticket.get(that.timerInputField).subject === true){
-				ticket.set(that.timerInputField, false)
-			} else{
-				ticket.set(that.timerInputField, true)
-			}
+			this.setTimer()
 		})
 		
 		selectDuration.on('change', function(){
-			if(ticket.get(that.durationInputField).subject === true){
-				ticket.set(that.durationInputField, false)
-			} else{
-				ticket.set(that.durationInputField, true)
-			}
+			this.setDuration()
 		})
 
 		closeInput.on('click', function(){
@@ -345,18 +337,56 @@ registerPlugin(proto(Gem, function(){
 		})
 	}
 
+	// Default Input Method
+	// var inputMethodSettings = this.ticket.get(this.settingsField).subject
 	this.settings = function(){
-		if(this.ticket.get(this.timerInputField).subject === true){
-			this.timer.visible = true
-		} else{
-			this.timer.visible = false
-		}
-		if(this.ticket.get(this.durationInputField).subject === true){
-			this.duration.visible = true
-		} else{
-			this.duration.visible = false
-		}
+		this.inputMethodSettings = this.ticket.get(this.settingsField).subject
+		return this.api.User.current().then(function(user){
+			this.inputMethodSettings.forEach(function(setting){
+				if(setting.worker === user.subject._id){
+					if(setting.timer === true){
+						that.timer.visible = true
+					} else{
+						that.timer.visible = false
+					}
+					if(setting.duration === true){
+						that.duration = true
+					} else{
+						that.duration = false
+					}
+				}
+			})
+		})
+	}
 
+	this.setTimer = function(){
+		return this.api.User.current().then(function(user){
+			this.inputMethodSettings.forEach(function(setting){
+				if(setting.worker === user.subject._id){
+					if(setting.timer === true){
+						// that.ticket.set(that.settingsField.timer, false)
+						setting['timer'] = false
+					} else{
+						// that.ticket.set(that.settingsField.timer, true)
+						setting['timer'] = true
+					}
+				}
+			})
+		})
+	}
+
+	this.setDuration = function(){
+		return this.api.User.current().then(function(user){
+			this.inputMethodSettings.forEach(function(setting){
+				if(setting.worker === user.subject._id){
+					if(setting.duration === true){
+						setting['duration'] = false
+					} else{
+						setting['duration'] = true
+					}
+				}
+			})
+		})
 	}
 
 	this.getStyle = function(){
