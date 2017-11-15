@@ -151,24 +151,25 @@ registerPlugin(proto(Gem, function(){
 		this.tWorkedField = optionsObservee.subject.timesWorkedField
 		this.tempInField = optionsObservee.subject.tempInField
 		this.settingsField = optionsObservee.subject.settingsField
+		this.inputMethodSettings = this.ticket.get(this.settingsField).subject
 		var that = this
 		console.log('settings ', ticket.get(this.settingsField))
 
 		// Default Input Method
-		var selectTimer = CheckBox()
-		if(ticket.get(this.timerInputField).subject === true){
-			selectTimer.selected = true
-		} else{
-			selectTimer.selected = false
-		}
-		var selectDuration = CheckBox()
-		if(ticket.get(this.durationInputField).subject === true){
-			selectDuration.selected = true
-		} else{
-			selectDuration.selected = false
-		}
+		this.selectTimer = CheckBox()
+		// if(ticket.get(this.timerInputField).subject === true){
+		// 	selectTimer.selected = true
+		// } else{
+		// 	selectTimer.selected = false
+		// }
+		this.selectDuration = CheckBox()
+		// if(ticket.get(this.durationInputField).subject === true){
+		// 	selectDuration.selected = true
+		// } else{
+		// 	selectDuration.selected = false
+		// }
 		var closeInput = Button('close', 'close')
-		var selectInput = Block(Text('Select a default input method '), selectTimer, Text('Timer '), selectDuration, Text('Duration'), closeInput)
+		var selectInput = Block(Text('Select a default input method '), this.selectTimer, Text('Timer '), this.selectDuration, Text('Duration'), closeInput)
 		selectInput.visible = false
 
 		// Timer
@@ -201,8 +202,10 @@ registerPlugin(proto(Gem, function(){
 
 		var inputSetting = Image(__webpack_require__(/*! url-loader!./settingsGear.png */ 2))
 		// check for input method settings
-		this.settings()
-		this.add(inputSetting, selectInput, this.timer, this.duration, showTable)
+		this.settings().then(function(){
+			that.add(inputSetting, selectInput, that.timer, that.duration, showTable)
+		}).done()
+		// this.add(inputSetting, selectInput, this.timer, this.duration, showTable)
 
 		// Timer - flatpickr options
 		var fp_options = {
@@ -361,12 +364,12 @@ registerPlugin(proto(Gem, function(){
 			inputSetting.visible = false
 		})
 		
-		selectTimer.on('change', function(){
-			this.setTimer()
+		this.selectTimer.on('change', function(){
+			that.setTimer()
 		})
 		
-		selectDuration.on('change', function(){
-			this.setDuration()
+		this.selectDuration.on('change', function(){
+			that.setDuration()
 		})
 
 		closeInput.on('click', function(){
@@ -423,21 +426,28 @@ registerPlugin(proto(Gem, function(){
 	}
 
 	// Default Input Method
-	// var inputMethodSettings = this.ticket.get(this.settingsField).subject
 	this.settings = function(){
-		this.inputMethodSettings = this.ticket.get(this.settingsField).subject
+		var that = this
+		console.log('this.settings')
 		return this.api.User.current().then(function(user){
-			this.inputMethodSettings.forEach(function(setting){
-				if(setting.worker === user.subject._id){
-					if(setting.timer === true){
+			that.inputMethodSettings.forEach(function(setting){
+				console.log('setting ', setting)
+				if(setting.workerField === user.subject._id){
+					if(setting.timerInputField === true){
+						console.log('timer true')
 						that.timer.visible = true
+						that.selectTimer.selected = true
 					} else{
 						that.timer.visible = false
+						that.selectTimer.selected = false
 					}
-					if(setting.duration === true){
-						that.duration = true
+					if(setting.durationInputField === true){
+						that.duration.visible = true
+						that.selectDuration.selected = true
 					} else{
-						that.duration = false
+						console.log('duration false')
+						that.duration.visible = false
+						that.selectDuration.selected = false
 					}
 				}
 			})
@@ -445,15 +455,16 @@ registerPlugin(proto(Gem, function(){
 	}
 
 	this.setTimer = function(){
+		var that = this
 		return this.api.User.current().then(function(user){
-			this.inputMethodSettings.forEach(function(setting){
-				if(setting.worker === user.subject._id){
-					if(setting.timer === true){
-						// that.ticket.set(that.settingsField.timer, false)
-						setting['timer'] = false
+			that.inputMethodSettings.forEach(function(setting){
+				if(setting.workerField === user.subject._id){
+					if(setting.timerInputField === true){
+						// that.ticket.set(that.settingsField.timerInputField, false)
+						setting['timerInputField'] = false
 					} else{
-						// that.ticket.set(that.settingsField.timer, true)
-						setting['timer'] = true
+						// that.ticket.set(that.settingsField.timerInputField, true)
+						setting['timerInputField'] = true
 					}
 				}
 			})
@@ -461,13 +472,14 @@ registerPlugin(proto(Gem, function(){
 	}
 
 	this.setDuration = function(){
+		var that = this
 		return this.api.User.current().then(function(user){
-			this.inputMethodSettings.forEach(function(setting){
-				if(setting.worker === user.subject._id){
-					if(setting.duration === true){
-						setting['duration'] = false
+			that.inputMethodSettings.forEach(function(setting){
+				if(setting.workerField === user.subject._id){
+					if(setting.durationInputField === true){
+						setting['durationInputField'] = false
 					} else{
-						setting['duration'] = true
+						setting['durationInputField'] = true
 					}
 				}
 			})
