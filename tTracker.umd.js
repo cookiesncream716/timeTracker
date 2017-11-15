@@ -93,6 +93,8 @@ registerPlugin(proto(Gem, function(){
 	this.initialize = function(options){
 		return{
 			timesWorkedField: 'timesWorked',
+			tempInField: 'tempIn',
+			settingsField: 'settings',
 			subfields: {
 				userField: 'user',
 				checkInField: 'checkIn',
@@ -100,11 +102,12 @@ registerPlugin(proto(Gem, function(){
 				minWorkedField: 'minWorked',
 				dateField: 'date',
 				nameField: 'name',
-				inField: 'in'
-			},
-			tempInField: 'tempIn',
-			timerInputField: 'timer',
-			durationInputField: 'duration'
+				inField: 'in',
+				workerField: 'worker',
+				timerInputField: 'timer',
+				durationInputField: 'duration'
+
+			}
 		}
 	}
 
@@ -129,15 +132,14 @@ registerPlugin(proto(Gem, function(){
 				in: {type: 'integer'}
 			}
 		}
-		result[options.timerInputField] = {
-			type: 'choice',
-			initial: true,
-			choices: 'true/false'
-		}
-		result[options.durationInputField] = {
-			type: 'choice',
-			initial: true,
-			choices: 'true/false'
+		result[options.settingsField] = {
+			type: 'compound',
+			list: true,
+			fields: {
+				workerField: {type: 'choice', choices: 'Users'},
+				timerInputField: {type: 'choice', initial: true, choices: [true, false]},
+				durationInputField: {type: 'choice', initial: true, choices: [true, false]}
+			}
 		}
 		return result		
 	}
