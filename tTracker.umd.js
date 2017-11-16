@@ -93,7 +93,6 @@ registerPlugin(proto(Gem, function(){
 	this.initialize = function(options){
 		return{
 			timesWorkedField: 'timesWorked',
-			tempInField: 'tempIn',
 			settingsField: 'settings',
 			subfields: {
 				userField: 'user',
@@ -103,7 +102,6 @@ registerPlugin(proto(Gem, function(){
 				dateField: 'date',
 				nameField: 'name',
 				inField: 'in',
-				workerField: 'worker',
 				timerInputField: 'timer',
 				durationInputField: 'duration'
 
@@ -124,21 +122,14 @@ registerPlugin(proto(Gem, function(){
 				date: {type: 'integer'}
 			}
 		}
-		result[options.tempInField] = {
-			type: 'compound',
-			list: true,
-			fields: {
-				name: {type: 'choice', choices: 'Users'},
-				in: {type: 'integer'}
-			}
-		}
 		result[options.settingsField] = {
 			type: 'compound',
 			list: true,
 			fields: {
-				workerField: {type: 'choice', initial: 'curUser', choices: 'Users'},
-				timerInputField: {type: 'choice', initial: true, choices: [true, false]},
-				durationInputField: {type: 'choice', initial: true, choices: [true, false]}
+				name: {type: 'choice', choices: 'Users'},
+				in: {type: 'integer'},
+				timer: {type: 'choice', choices: [true, false]},
+				duration: {type: 'choice', choices: [true, false]}
 			}
 		}
 		return result
@@ -149,27 +140,16 @@ registerPlugin(proto(Gem, function(){
 		this.api = api
 		this.optionsObservee = optionsObservee
 		this.tWorkedField = optionsObservee.subject.timesWorkedField
-		this.tempInField = optionsObservee.subject.tempInField
 		this.settingsField = optionsObservee.subject.settingsField
 		this.inputMethodSettings = this.ticket.get(this.settingsField).subject
 		var that = this
-		console.log('settings ', ticket.get(this.settingsField))
+		console.log('settings line 73', ticket.get(this.settingsField))
 
 		// Default Input Method
 		this.selectTimer = CheckBox()
-		// if(ticket.get(this.timerInputField).subject === true){
-		// 	selectTimer.selected = true
-		// } else{
-		// 	selectTimer.selected = false
-		// }
 		this.selectDuration = CheckBox()
-		// if(ticket.get(this.durationInputField).subject === true){
-		// 	selectDuration.selected = true
-		// } else{
-		// 	selectDuration.selected = false
-		// }
 		var closeInput = Button('close', 'close')
-		var selectInput = Block(Text('Select a default input method '), this.selectTimer, Text('Timer '), this.selectDuration, Text('Duration'), closeInput)
+		var selectInput = Block('div', Text('Select a default input method '), this.selectTimer, Text('Timer '), this.selectDuration, Text('Duration'), closeInput)
 		selectInput.visible = false
 
 		// Timer
@@ -201,14 +181,10 @@ registerPlugin(proto(Gem, function(){
 		var showTable = Block('div', openTable, table, tableText, closeTable)	
 
 		var inputSetting = Image(__webpack_require__(/*! url-loader!./settingsGear.png */ 2))
-		// check for input method settings
-		this.settings().then(function(){
-			that.add(inputSetting, selectInput, that.timer, that.duration, showTable)
-		}).done()
-		// this.add(inputSetting, selectInput, this.timer, this.duration, showTable)
+
 
 		// Timer - flatpickr options
-		var fp_options = {
+		this.fp_options = {
 			enableTime: true,
 			dateFormat: 'm-d-Y h:i K',
 			minuteIncrement: 1,
@@ -219,26 +195,34 @@ registerPlugin(proto(Gem, function(){
 			}
 		}
 
-		// Timer - checkIn Time
-		// check to see if user is in tempInField
-		if(ticket.get(this.tempInField).subject.length > 0){
-			var next = api.User.current().then(function(user){
-				var inSubject = ticket.get(that.tempInField).subject
-				inSubject.forEach(function(sub){
-					if(user.subject._id === sub.name){
-						fp_options['defaultDate'] = new Date(sub.in)
-					}
-				})
-			})
-		} else{
-			var next = Future(undefined)
-		}
-		console.log('options ', fp_options)
-		next.then(function(){
-			// should not need to put in checkIn.val =; Flatpickr should set it but it is not showing in box.
-			that.checkIn.val = fp_options['defaultDate']
-			var fp_in = new flatpickr(that.checkIn.domNode, fp_options)
+		// check for input method settings
+		this.settings().then(function(){
+			that.add(inputSetting, selectInput, that.timer, that.duration, showTable)
 		}).done()
+
+		// Timer - checkIn Time
+		console.log('fp_options ', this.fp_options)
+		var fp_in = new flatpickr(this.checkIn.domNode, this.fp_options)
+
+		// check to see if user is in tempInField
+		// if(ticket.get(this.tempInField).subject.length > 0){
+		// 	var next = api.User.current().then(function(user){
+		// 		var inSubject = ticket.get(that.tempInField).subject
+		// 		inSubject.forEach(function(sub){
+		// 			if(user.subject._id === sub.name){
+		// 				fp_options['defaultDate'] = new Date(sub.in)
+		// 			}
+		// 		})
+		// 	})
+		// } else{
+		// 	var next = Future(undefined)
+		// }
+		// console.log('options ', fp_options)
+		// next.then(function(){
+		// 	// should not need to put in checkIn.val =; Flatpickr should set it but it is not showing in box.
+		// 	that.checkIn.val = fp_options['defaultDate']
+		// 	var fp_in = new flatpickr(that.checkIn.domNode, fp_options)
+		// }).done()
 	
 
 		// Timer - checkOut Time
@@ -428,29 +412,45 @@ registerPlugin(proto(Gem, function(){
 	// Default Input Method
 	this.settings = function(){
 		var that = this
-		console.log('this.settings')
+		console.log('in this.settings')
 		return this.api.User.current().then(function(user){
-			that.inputMethodSettings.forEach(function(setting){
-				console.log('setting ', setting)
-				if(setting.workerField === user.subject._id){
-					if(setting.timerInputField === true){
-						console.log('timer true')
+			if(that.inputMethodSettings === undefined){
+				that.timer.visible = true
+				that.selectTimer.selected = true
+				that.duration.visible = true
+				that.selectDuration.selected = true
+			} else{
+				that.inputMethodSettings.forEach(function(setting){
+					console.log('setting ', setting)
+					if(setting.nameField === user.subject._id){
+						if(setting.timerInputField === true){
+							console.log('timer true')
+							that.timer.visible = true
+							that.selectTimer.selected = true
+						} else{
+							that.timer.visible = false
+							that.selectTimer.selected = false
+						}
+						if(setting.durationInputField === true){
+							that.duration.visible = true
+							that.selectDuration.selected = true
+						} else{
+							console.log('duration false')
+							that.duration.visible = false
+							that.selectDuration.selected = false
+						}
+						if(setting.inField){
+							console.log('setting.in')
+							that.fp_options['defaultDate'] = setting.inField
+						}
+					} else{
 						that.timer.visible = true
 						that.selectTimer.selected = true
-					} else{
-						that.timer.visible = false
-						that.selectTimer.selected = false
-					}
-					if(setting.durationInputField === true){
 						that.duration.visible = true
 						that.selectDuration.selected = true
-					} else{
-						console.log('duration false')
-						that.duration.visible = false
-						that.selectDuration.selected = false
 					}
-				}
-			})
+				})
+			}
 		})
 	}
 
@@ -458,14 +458,18 @@ registerPlugin(proto(Gem, function(){
 		var that = this
 		return this.api.User.current().then(function(user){
 			that.inputMethodSettings.forEach(function(setting){
-				if(setting.workerField === user.subject._id){
+				if(setting.nameField === user.subject._id){
 					if(setting.timerInputField === true){
-						// that.ticket.set(that.settingsField.timerInputField, false)
 						setting['timerInputField'] = false
 					} else{
-						// that.ticket.set(that.settingsField.timerInputField, true)
 						setting['timerInputField'] = true
 					}
+				} else{
+					var fields = optionsObservee.subject
+					var data = {}
+					data[fields.subfields.nameField] = user.subject._id
+					data[fields.subfields.timerInputField] = that.selectTimer.selected
+					ticket.get(that.settingsField).push(data)
 				}
 			})
 		})
@@ -475,11 +479,11 @@ registerPlugin(proto(Gem, function(){
 		var that = this
 		return this.api.User.current().then(function(user){
 			that.inputMethodSettings.forEach(function(setting){
-				if(setting.workerField === user.subject._id){
-					if(setting.durationInputField === true){
-						setting['durationInputField'] = false
+				if(setting.worker === user.subject._id){
+					if(setting.duration === true){
+						setting['duration'] = false
 					} else{
-						setting['durationInputField'] = true
+						setting['duration'] = true
 					}
 				}
 			})
@@ -491,10 +495,12 @@ registerPlugin(proto(Gem, function(){
 			$div: {
 				display: 'block',
 				padding: 10,
+				width: '100%',
+				backgroundColor:'yellow'
 			},
 			Image: {
 				width: '5%',
-				marginLeft: '90%'
+				marginLeft: '95%'
 			},
 			$error: {
 				color: 'red',
