@@ -141,9 +141,10 @@ registerPlugin(proto(Gem, function(){
 		this.optionsObservee = optionsObservee
 		this.tWorkedField = optionsObservee.subject.timesWorkedField
 		this.settingsField = optionsObservee.subject.settingsField
-		this.inputMethodSettings = this.ticket.get(this.settingsField).subject
+		this.settings = this.ticket.get(this.settingsField).subject
+		this.settingsFieldObservee = this.ticket.get(this.settingsField)
 		var that = this
-		console.log('settings line 73', ticket.get(this.settingsField))
+		console.log('settingsField line 62', ticket.get(this.settingsField))
 
 		// Default Input Method
 		this.selectTimer = CheckBox()
@@ -196,34 +197,13 @@ registerPlugin(proto(Gem, function(){
 		}
 
 		// check for input method settings
-		this.settings().then(function(){
+		this.getSettings().then(function(){
 			that.add(inputSetting, selectInput, that.timer, that.duration, showTable)
 		}).done()
 
 		// Timer - checkIn Time
 		console.log('fp_options ', this.fp_options)
 		var fp_in = new flatpickr(this.checkIn.domNode, this.fp_options)
-
-		// check to see if user is in tempInField
-		// if(ticket.get(this.tempInField).subject.length > 0){
-		// 	var next = api.User.current().then(function(user){
-		// 		var inSubject = ticket.get(that.tempInField).subject
-		// 		inSubject.forEach(function(sub){
-		// 			if(user.subject._id === sub.name){
-		// 				fp_options['defaultDate'] = new Date(sub.in)
-		// 			}
-		// 		})
-		// 	})
-		// } else{
-		// 	var next = Future(undefined)
-		// }
-		// console.log('options ', fp_options)
-		// next.then(function(){
-		// 	// should not need to put in checkIn.val =; Flatpickr should set it but it is not showing in box.
-		// 	that.checkIn.val = fp_options['defaultDate']
-		// 	var fp_in = new flatpickr(that.checkIn.domNode, fp_options)
-		// }).done()
-	
 
 		// Timer - checkOut Time
 		var fp_out = new flatpickr(this.checkOut.domNode, {
@@ -235,9 +215,9 @@ registerPlugin(proto(Gem, function(){
 				// get tempIn time for current user then compare it to checkOut.val
 				api.User.current().then(function(curUser){
 					var index = -1
-					var inSubject = ticket.get(that.tempInField).subject
-					inSubject.forEach(function(sub, i){
-						if(curUser.subject._id === sub.name){
+					// var inSubject = ticket.get(that.settingsField).subject
+					that.settings.forEach(function(setting, i){
+						if(curUser.subject._id === setting.nameField){
 							index = i
 						}
 					})
@@ -245,13 +225,14 @@ registerPlugin(proto(Gem, function(){
 						errMessage.text = 'Please enter a Start Time before entering an End Time'
 						errMessage.visible = true
 						that.checkOut.val = ''
-					} else if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < ticket.get(that.tempInField).subject[index].in){
+					} else if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < ticket.get(that.settingsField).subject[index].inField){
 						errMessage.text = 'Please enter an End Time that is later than the Start Time'
 						errMessage.visible = true
 						that.checkOut.val = ''
 					} else{
 						errMessage.visible = false
 						that.saveTime(index)
+						console.log('settingsField ', ticket.get(that.settingsField))
 					}
 				}).done()
 			}
@@ -336,7 +317,7 @@ registerPlugin(proto(Gem, function(){
 			that.timer.visible = true
 			inputSetting.visible = true
 			table.remove(table.children)
-			that.settings()
+			that.getSettings()
 		})
 
 		// Default Input Method
@@ -360,7 +341,7 @@ registerPlugin(proto(Gem, function(){
 			selectInput.visible = false
 			inputSetting.visible = true
 			showTable.visible = true
-			that.settings()
+			that.getSettings()
 		})
 
 		// css stylesheet for flatpickr
@@ -374,20 +355,36 @@ registerPlugin(proto(Gem, function(){
 
 	// Timer -save checkIn temporarily
 	this.storeIn = function(){
+		console.log('in storeIn ', this.ticket.get(this.settingsField))
 		var that = this
 		return this.api.User.current().then(function(curUser){
-			var fields = that.optionsObservee.subject
-			var info = {}
-			info[fields.subfields.nameField] = curUser.subject._id
-			info[fields.subfields.inField] = new Date(that.checkIn.val).getTime()
-			that.ticket.get(that.tempInField).push(info)
+			var saveIn = function(){
+				var fields = that.optionsObservee.subject
+				var info = {}
+				info[fields.subfields.nameField] = curUser.subject._id
+				info[fields.subfields.inField] = new Date(that.checkIn.val).getTime()
+				that.ticket.get(that.settingsField).push(info)				
+			}
+			if(that.settings.length === 0){
+				saveIn()
+			} else{
+				that.settings.forEach(function(setting, index){
+					if(setting.name === curUser.subject._id){
+						console.log(index)
+						// that.settingsFieldObservee.set([index,'timer'], !setting.timer)
+						that.settingsFieldObservee.set([index, 'in'], new Date(that.checkIn.val).getTime())
+					} else{
+						saveIn()
+					}
+				})				
+			}
 		})
 	}
 
 	// Timer - find how long worked and save everything to ticket
 	this.saveTime = function(index){
 		var that = this
-		var msWorked = new Date(that.checkOut.val).getTime() - this.ticket.get(this.tempInField).subject[index].in
+		var msWorked = new Date(that.checkOut.val).getTime() - this.ticket.get(this.settingsField).subject[index].inField
 		var hours = Math.floor(msWorked/1000/60/60)
 		msWorked -= hours*1000*60*60
 		var minutes = Math.floor(msWorked/1000/60)
@@ -397,51 +394,58 @@ registerPlugin(proto(Gem, function(){
 			that.workedText.visible = false
 		}, 5000)
 		return this.api.User.current().then(function(user){
+			console.log('tWorkedField ', that.ticket.get(that.tWorkedField))
 			var fields = that.optionsObservee.subject
 			var stats = {}
 			stats[fields.subfields.userField] = user.subject._id
-			stats[fields.subfields.checkInField] = that.ticket.get(that.tempInField).subject[index].in
+			stats[fields.subfields.checkInField] = that.ticket.get(that.settingsField).subject[index].inField
 			stats[fields.subfields.checkOutField] = new Date(that.checkOut.val).getTime()
 			that.ticket.get(that.tWorkedField).push(stats)
+			console.log('tWorkedField ', that.ticket.get(that.tWorkedField))
 			that.checkIn.val = ''
 			that.checkOut.val = ''
-			that.ticket.get(that.tempInField).splice(index, 1)
+			that.settings.forEach(function(setting, index){
+				if(setting.name === user.subject._id){
+					that.settingsFieldObservee.set([index,'in'], 0)
+				}
+			})
+			console.log('settingsField ', that.ticket.get(that.settingsField))
 		})
 	}
 
 	// Default Input Method
-	this.settings = function(){
+	this.getSettings = function(){
 		var that = this
-		console.log('in this.settings')
+		// console.log('in this.settings')
 		return this.api.User.current().then(function(user){
-			if(that.inputMethodSettings === undefined){
+			if(that.settings.length === 0){
 				that.timer.visible = true
 				that.selectTimer.selected = true
 				that.duration.visible = true
 				that.selectDuration.selected = true
 			} else{
-				that.inputMethodSettings.forEach(function(setting){
-					console.log('setting ', setting)
-					if(setting.nameField === user.subject._id){
-						if(setting.timerInputField === true){
-							console.log('timer true')
+				that.settings.forEach(function(setting){
+					// console.log('setting ', setting)
+					if(setting.name === user.subject._id){
+						if(setting.timer === true){
+							// console.log('timer true')
 							that.timer.visible = true
 							that.selectTimer.selected = true
 						} else{
 							that.timer.visible = false
 							that.selectTimer.selected = false
 						}
-						if(setting.durationInputField === true){
+						if(setting.duration === true){
 							that.duration.visible = true
 							that.selectDuration.selected = true
 						} else{
-							console.log('duration false')
+							// console.log('duration false')
 							that.duration.visible = false
 							that.selectDuration.selected = false
 						}
-						if(setting.inField){
-							console.log('setting.in')
-							that.fp_options['defaultDate'] = setting.inField
+						if(setting.in && setting.in !== 0){
+							// console.log('setting.in')
+							that.fp_options['defaultDate'] = setting.in
 						}
 					} else{
 						that.timer.visible = true
@@ -457,36 +461,60 @@ registerPlugin(proto(Gem, function(){
 	this.setTimer = function(){
 		var that = this
 		return this.api.User.current().then(function(user){
-			that.inputMethodSettings.forEach(function(setting){
-				if(setting.nameField === user.subject._id){
-					if(setting.timerInputField === true){
-						setting['timerInputField'] = false
+			console.log('setTimer start ', that.settings.length)
+			var firstTimer = function(){
+				var fields = that.optionsObservee.subject
+				var data = {}
+				data[fields.subfields.nameField] = user.subject._id
+				data[fields.subfields.timerInputField] = that.selectTimer.selected
+				that.ticket.get(that.settingsField).push(data)
+			}
+
+			if(that.settings.length === 0){
+				console.log('timer length 0')
+				firstTimer()
+			} else{
+				that.settings.forEach(function(setting, index){
+					if(setting.name === user.subject._id){
+						console.log('timer found user')
+						that.settingsFieldObservee.set([index,'timer'], !setting.timer)
 					} else{
-						setting['timerInputField'] = true
+						console.log('timer no user')
+						firstTimer()
 					}
-				} else{
-					var fields = optionsObservee.subject
-					var data = {}
-					data[fields.subfields.nameField] = user.subject._id
-					data[fields.subfields.timerInputField] = that.selectTimer.selected
-					ticket.get(that.settingsField).push(data)
-				}
-			})
+				})
+			}
+			console.log('setTimer done ', that.settings)
 		})
 	}
 
 	this.setDuration = function(){
 		var that = this
 		return this.api.User.current().then(function(user){
-			that.inputMethodSettings.forEach(function(setting){
-				if(setting.worker === user.subject._id){
-					if(setting.duration === true){
-						setting['duration'] = false
+			console.log('setDuration start ', that.settings)
+			var firstDuration = function(){
+				var fields = that.optionsObservee.subject
+				var data = {}
+				data[fields.subfields.nameField] = user.subject._id
+				data[fields.subfields.durationInputField] = that.selectDuration.selected
+				that.ticket.get(that.settingsField).push(data)
+			}
+
+			if(that.settings.length === 0){
+				console.log('duration length 0')
+				firstDuration()
+			} else{
+				that.settings.forEach(function(setting, index){
+					if(setting.name === user.subject._id){
+						console.log('timer found user')
+						that.settingsFieldObservee.set([index,'duration'], !setting.duration)
 					} else{
-						setting['duration'] = true
+						console.log('duration no user')
+						firstDuration()
 					}
-				}
-			})
+				})
+			}
+			console.log('setDuration done ', that.settings)
 		})
 	}
 
@@ -527,7 +555,6 @@ registerPlugin(proto(Gem, function(){
 				borderRadius: 5
 			},
 			Button: {
-				// make backgroundColor match Tixit's blue
 				backgroundColor: 'rgb(52, 152, 219)',
 				color: 'white',
 				fontWeight: 'bold',
