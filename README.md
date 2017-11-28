@@ -11,26 +11,28 @@ If you input a start time, that time will be saved so you can come back and inpu
 This plugin has the following configuration options:
 
 * ***`timesWorkedField`*** - The name of the compound field to store the list of work durations.
-* ***`tempInField`*** - The field used to store the start time so the user can check-in, work on the ticket, and then enter the stop time. 
-* ***`subfields`*** - An object containing the names of sub-fields to the `timesWorkedField` and `tempInField`:
+* ***`settingsField`*** - The name of the compound field to store the input settings and temporarily store the start time. 
+* ***`subfields`*** - An object containing the names of sub-fields to the `timesWorkedField` and `settingsField`:
   * ***`userField`*** - The name of the sub-field of `timesWorkedField` used to store the user `_id` of the user recording their time.
   * ***`checkInField`*** - The name of the sub-field of `timesWorkedField` used to store the check in time.
   * ***`checkOutField`*** - The name of the sub-field of `timesWorkedField` used to store the check out time.
   * ***`dateField`*** - The name of the sub-field of `timesWorkedField` used to store the date a user worked a number of minutes.
   * ***`minWorkedField`*** - The name of the sub-field of `timesWorkedField` used to store the number of minutes worked at a given date.
-  * ***`nameField`*** - The name of the sub-field of `tempInField` used to store the user `_id` of the user recording their time.
-  * ***`inField`*** - The name of the sub-field of `tempInField` used to store the starting time. 
+  * ***`nameField`*** - The name of the sub-field of `settingsField` used to store the user `_id` of the user recording their settings and start time.
+  * ***`inField`*** - The name of the sub-field of `settingsField` used to store the starting time so the user can check-in, work on a ticket, and then enter the stop time.
+  * ***`timerInputField`*** - The name of the sub-field of `settingsField` used to store either true or false, depending on whether the user has chosen the input method of a start/stop time or not.
+  * ***`durationInputField`*** - The name of the sub-field of `settingsField` used to store either true or false, depending on whether the user has chosen to input time worked as a number of minutes or not. 
 
 The field specified by the `timesWorkedField` option will be a compound list, where each object has an associated `user` and will either have `checkIn` and `checkOut` times or will have a `date` and a number of minutes worked (the `minWorked` field).
 
-The field specified by the `tempInField` option will also be a compound list, where each has an associateted `name` and `in` time.
+The field specified by the `settingsField` option will also be a compound list, where each object has an associateted `name`  and may have an `in` time, `timer` input setting, or `duration` input setting.
 
 Required ticket schema fields (names based on the default configuration options):
 
-|    Name    |   Type   | List | Initial Value | Editable | Choices | Required |
-|:----------:|:--------:|:----:|:-------------:|:--------:|:-------:|:--------:|
-| timeWorked | compound |   X  |               |     X    |         |          |
-|   tempIn   | compound |   X  |               |     X    |         |          |
+|     Name    |   Type   | List | Initial Value | Editable | Choices | Required |
+|:-----------:|:--------:|:----:|:-------------:|:--------:|:-------:|:--------:|
+| timesWorked | compound |   X  |               |     X    |         |          |
+|   settings  | compound |   X  |               |     X    |         |          |
 
 Subfields of `timesWorked`:
 
@@ -42,12 +44,15 @@ Subfields of `timesWorked`:
 | minWorked | integer |      |      none     |     X    |         |          |
 |    date   | integer |      |      none     |     X    |         |          |
 
-Subfields of `tempIn`:
+Subfields of `settings`:
 
-| Name |   Type  | List | Initial Value | Editable | Choices | Required |
-|:----:|:-------:|:----:|:-------------:|:--------:|:-------:|:--------:|
-| name |  choice |      |      none     |     X    |   User  |          |
-|  in  | integer |      |      none     |     X    |         |          |
+|   Name   |   Type  | List | Initial Value | Editable |    Choices    | Required |
+|:--------:|:-------:|:----:|:-------------:|:--------:|:-------------:|:--------:|
+|   name   |  choice |      |               |     X    |     Users     |          |
+|    in    | integer |      |               |     X    |               |          |
+| timer    | choice  |      |               |     X    | [true, false] |          |
+| duration | choice  |      |               |     X    | [true, false] |          |
+
 
 For more information about Tixit plugins go here: [http://docs.tixit.me/d/Plugin_API](http://docs.tixit.me/d/Plugin_API).
 
