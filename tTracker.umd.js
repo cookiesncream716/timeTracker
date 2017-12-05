@@ -89,7 +89,7 @@ var flatpickr = __webpack_require__(/*! flatpickr */ 1)
 registerPlugin(proto(Gem, function(){
 	this.name = 'TimeTracker'
 
-	// set ticket field options
+	// set configuration options
 	this.initialize = function(options){
 		return{
 			timesWorkedField: 'timesWorked',
@@ -109,6 +109,7 @@ registerPlugin(proto(Gem, function(){
 		}
 	}
 
+	// ticket fields
 	this.requireFields = function(options){
 		var result = {}
 		result[options.timesWorkedField] = {
