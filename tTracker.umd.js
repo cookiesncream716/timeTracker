@@ -160,7 +160,7 @@ registerPlugin(proto(Gem, function(){
 		this.checkOut = TextField()
 		this.workedText = Text()
 		this.workedText.visible = false
-		var errMessage = Text('error', 'Your End Time must be later than your Start Time')
+		var errMessage = Text('error', 'error message')
 		errMessage.visible = false
 		this.timer = Block('div', Text('Start Time: '), this.checkIn, Text(' End Time: '), this.checkOut, errMessage, this.workedText)
 
@@ -185,6 +185,7 @@ registerPlugin(proto(Gem, function(){
 
 		var inputSetting = Image(__webpack_require__(/*! url-loader!./settingsGear.png */ 2))
 
+
 		// Timer - flatpickr options
 		this.fp_options = {
 			enableTime: true,
@@ -193,7 +194,14 @@ registerPlugin(proto(Gem, function(){
 			maxDate: 'today',
 			defaultDate: null,
 			onClose: function(){
-				that.storeIn()
+				if(Number.isInteger(new Date(that.checkIn.val).getTime()) === false){
+					errMessage.text = 'You must enter a date and time'
+					errMessage.visible = true
+					that.checkIn.val = ''
+				} else{
+					that.storeIn()
+					errMessage.visible = false
+				}
 			}
 		}
 
@@ -354,7 +362,7 @@ registerPlugin(proto(Gem, function(){
 
 	// Timer -save checkIn temporarily
 	this.storeIn = function(){
-		console.log('in storeIn ', this.ticket.get(this.settingsField))
+		// console.log('in storeIn ', this.ticket.get(this.settingsField))
 		var that = this
 		return this.api.User.current().then(function(curUser){
 			var saveIn = function(){
@@ -2919,8 +2927,6 @@ if (true) module.exports = flatpickr;
 
 /***/ }),
 /* 2 */
-<<<<<<< HEAD
-=======
 /*!****************************************************!*\
   !*** ./node_modules/url-loader!./settingsGear.png ***!
   \****************************************************/
@@ -2932,7 +2938,6 @@ module.exports = "data:image/png;base64,AAABAAkAAAAAAAEAIABIFgAAlgAAAICAAAABACAA
 
 /***/ }),
 /* 3 */
->>>>>>> dev
 /*!*********************************************************************************!*\
   !*** ./node_modules/raw-loader!./node_modules/flatpickr/dist/flatpickr.min.css ***!
   \*********************************************************************************/

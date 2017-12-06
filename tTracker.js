@@ -149,7 +149,7 @@ registerPlugin(proto(Gem, function(){
 						errMessage.visible = true
 						that.checkOut.val = ''
 					} else if(that.checkOut.val == '' || new Date(that.checkOut.val).getTime() < ticket.get(that.settingsField).subject[index].in){
-						errMessage.text = 'Please enter an End Time that is later than the Start Time'>>>>>>> dev
+						errMessage.text = 'Please enter an End Time that is later than the Start Time'
 						errMessage.visible = true
 						that.checkOut.val = ''
 					} else{
