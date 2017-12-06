@@ -438,7 +438,6 @@ registerPlugin(proto(Gem, function(){
 				display: 'block',
 				padding: 10,
 				width: '100%',
-				backgroundColor:'yellow'
 			},
 			Image: {
 				width: '5%',
