@@ -1,8 +1,21 @@
 'use strict'
 var flatpickr = require('flatpickr')
 
+// css stylesheet for flatpickr
+var flatpickrStylesheet = require('raw-loader!flatpickr/dist/flatpickr.min.css')
+var style = document.createElement('style')
+style.innerHTML = flatpickrStylesheet
+document.head.appendChild(style)
+
 registerPlugin(proto(Gem, function(){
 	this.name = 'TimeTracker'
+
+	// // css stylesheet for flatpickr
+	// var flatpickrStylesheet = require('raw-loader!flatpickr/dist/flatpickr.min.css')
+	// var style = document.createElement('style')
+	// style.innerHTML = flatpickrStylesheet
+	// document.head.appendChild(style)
+
 
 	// set configuration options
 	this.initialize = function(options){
@@ -264,14 +277,6 @@ registerPlugin(proto(Gem, function(){
 			inputSetting.visible = true
 			showTable.visible = true
 			that.getSettings()
-		})
-
-		// css stylesheet for flatpickr
-		this.on('attach', function(){
-			var flatpickrStylesheet = require('raw-loader!flatpickr/dist/flatpickr.min.css')
-			var style = document.createElement('style')
-			style.innerHTML = flatpickrStylesheet
-			document.head.appendChild(style)
 		})
 	}
 
