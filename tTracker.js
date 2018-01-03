@@ -10,13 +10,6 @@ document.head.appendChild(style)
 registerPlugin(proto(Gem, function(){
 	this.name = 'TimeTracker'
 
-	// // css stylesheet for flatpickr
-	// var flatpickrStylesheet = require('raw-loader!flatpickr/dist/flatpickr.min.css')
-	// var style = document.createElement('style')
-	// style.innerHTML = flatpickrStylesheet
-	// document.head.appendChild(style)
-
-
 	// set configuration options
 	this.initialize = function(options){
 		return{
@@ -37,31 +30,36 @@ registerPlugin(proto(Gem, function(){
 		}
 	}
 
+// * in requireFields, you're using options.timesWorkedField and options.settingsField, but you're not using any of the subfield options in the same way - they're just hard coded
+
 	// ticket fields
 	this.requireFields = function(options){
+		console.log('hey')
 		var result = {}
 		result[options.timesWorkedField] = {
 			type: 'compound',
 			list: true,
-			fields: {
-				user: {type: 'choice', choices: 'Users'},
-				checkIn: {type: 'integer'},
-				checkOut: {type: 'integer'},
-				minWorked: {type: 'integer'},
-				date: {type: 'integer'}
-			}
+			fields: {}
 		}
+		result[options.timesWorkedField.fields.userField] = {type: 'choice', choices: 'Users'}
+		result[options.timesWorkedField.fields.checkInField] = {type: 'integer'}
+		result[options.timesWorkedField.fields.checkOutField] = {type: 'integer'}
+		result[options.timesWorkedField.fields.minWorkedField] = {type: 'integer'}
+		result[options.timesWorkedField.fields.dateField] = {type: 'integer'}
+
 		result[options.settingsField] = {
 			type: 'compound',
 			list: true,
-			fields: {
-				name: {type: 'choice', choices: 'Users'},
-				in: {type: 'integer'},
-				timer: {type: 'choice', choices: [true, false]},
-				duration: {type: 'choice', choices: [true, false]}
-			}
+			fields: {}
 		}
+		result[options.settingsField.fields.nameField] = {type: 'choice', choices: 'Users'}
+		result[options.settingsField.fields.inField] = {type: 'integer'}
+		result[options.settingsField.fields.timerInputField] = {type: 'choice', choices: [true, false]}
+		result[options.settingsField.fields.durationInputField] = {type: 'choice', choices: [true, false]}
+
 		return result
+		console.log('result ', result)
+		console.log('hey')
 	}
 
 	this.build = function(ticket, optionsObservee, api){
