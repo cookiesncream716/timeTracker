@@ -30,8 +30,6 @@ registerPlugin(proto(Gem, function(){
 		}
 	}
 
-// * in requireFields, you're using options.timesWorkedField and options.settingsField, but you're not using any of the subfield options in the same way - they're just hard coded
-
 	// ticket fields
 	this.requireFields = function(options){
 		console.log('hey')
@@ -58,8 +56,6 @@ registerPlugin(proto(Gem, function(){
 		result[options.settingsField.fields.durationInputField] = {type: 'choice', choices: [true, false]}
 
 		return result
-		console.log('result ', result)
-		console.log('hey')
 	}
 
 	this.build = function(ticket, optionsObservee, api){
@@ -71,8 +67,6 @@ registerPlugin(proto(Gem, function(){
 		this.settings = this.ticket.get(this.settingsField).subject
 		this.settingsFieldObservee = this.ticket.get(this.settingsField)
 		var that = this
-		// console.log('settingsField line 62', ticket.get(this.settingsField))
-		// console.log('tWorkedField in line 63', ticket.get(this.tWorkedField))
 
 		// Default Input Method
 		this.selectTimer = CheckBox()
@@ -317,14 +311,12 @@ registerPlugin(proto(Gem, function(){
 			that.workedText.visible = false
 		}, 5000)
 		return this.api.User.current().then(function(user){
-			// console.log('tWorkedField ', that.ticket.get(that.tWorkedField))
 			var fields = that.optionsObservee.subject
 			var stats = {}
 			stats[fields.subfields.userField] = user.subject._id
 			stats[fields.subfields.checkInField] = that.ticket.get(that.settingsField).subject[index].in
 			stats[fields.subfields.checkOutField] = new Date(that.checkOut.val).getTime()
 			that.ticket.get(that.tWorkedField).push(stats)
-			// console.log('tWorkedField ', that.ticket.get(that.tWorkedField))
 			that.checkIn.val = ''
 			that.checkOut.val = ''
 			that.settings.forEach(function(setting, index){
@@ -379,7 +371,6 @@ registerPlugin(proto(Gem, function(){
 					}
 				})
 			}
-			// console.log('getSettings line 377 ', that.settings)
 		})
 	}
 
@@ -405,7 +396,6 @@ registerPlugin(proto(Gem, function(){
 					}
 				})
 			}
-			// console.log('setTimer done ', that.settings)
 		})
 	}
 
@@ -431,7 +421,6 @@ registerPlugin(proto(Gem, function(){
 					}
 				})
 			}
-			// console.log('setDuration done ', that.settings)
 		})
 	}
 
