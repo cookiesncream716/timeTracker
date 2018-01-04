@@ -126,43 +126,21 @@ registerPlugin(proto(Gem, function(){
 			list: true,
 			fields: timesWorkedSubfields
 		}
-		timesWorkedSubfields[options.subfields.userField] = {
-			type: 'choice',
-			choices: 'Users'
-		}
-		timesWorkedSubfields[options.subfields.checkInField] = {
-			type: 'integer'
-		}
-		timesWorkedSubfields[options.subfields.checkOutField] = {
-			type: 'integer'
-		}
-		timesWorkedSubfields[options.subfields.minWorkedField] = {
-			type: 'integer'
-		}
-		timesWorkedSubfields[options.subfields.dateField] = {
-			type: 'integer'
-		}
+		timesWorkedSubfields[options.subfields.userField] = {type: 'choice', choices: 'Users'}
+		timesWorkedSubfields[options.subfields.checkInField] = {type: 'integer'}
+		timesWorkedSubfields[options.subfields.checkOutField] = {type: 'integer'}
+		timesWorkedSubfields[options.subfields.minWorkedField] = {type: 'integer'}
+		timesWorkedSubfields[options.subfields.dateField] = {type: 'integer'}
 
 		mainFields[options.settingsField] = {
 			type: 'compound',
 			list: true,
 			fields: settingsSubfields
 		}
-		settingsSubfields[options.subfields.nameField] = {
-			type: 'choice',
-			choices: 'Users'
-		}
-		settingsSubfields[options.subfields.inField] = {
-			type: 'integer'
-		}
-		settingsSubfields[options.subfields.timerInputField] = {
-			type: 'choice',
-			choices: [true, false]
-		}
-		settingsSubfields[options.subfields.durationInputField] = {
-			type: 'choice',
-			choices: [true, false]
-		}
+		settingsSubfields[options.subfields.nameField] = {type: 'choice', choices: 'Users'}
+		settingsSubfields[options.subfields.inField] = {type: 'integer'}
+		settingsSubfields[options.subfields.timerInputField] = {type: 'choice', choices: [true, false]}
+		settingsSubfields[options.subfields.durationInputField] = {type: 'choice', choices: [true, false]}
 
 		return mainFields
 	}
