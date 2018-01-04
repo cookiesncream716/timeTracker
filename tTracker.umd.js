@@ -164,7 +164,7 @@ registerPlugin(proto(Gem, function(){
 			choices: [true, false]
 		}
 
-		return mainFields, timesWorkedSubfields, settingsSubfields
+		return mainFields
 	}
 
 	this.build = function(ticket, optionsObservee, api){
