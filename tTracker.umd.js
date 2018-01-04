@@ -117,28 +117,49 @@ registerPlugin(proto(Gem, function(){
 
 	// ticket fields
 	this.requireFields = function(options){
-		console.log('hey')
 		var result = {}
 		result[options.timesWorkedField] = {
 			type: 'compound',
-			list: true,
-			fields: {}
+			list: true
+			// fields: {'user', 'checkIn', 'checkOut', 'minWorked', 'date'} - if this is here, it won't bundle
 		}
-		result[options.timesWorkedField.fields.userField] = {type: 'choice', choices: 'Users'}
-		result[options.timesWorkedField.fields.checkInField] = {type: 'integer'}
-		result[options.timesWorkedField.fields.checkOutField] = {type: 'integer'}
-		result[options.timesWorkedField.fields.minWorkedField] = {type: 'integer'}
-		result[options.timesWorkedField.fields.dateField] = {type: 'integer'}
+		result[options.subfields.userField] = {
+			type: 'choice',
+			choices: 'Users'
+		}
+		result[options.subfields.checkInField] = {
+			type: 'integer'
+		}
+		result[options.subfields.checkOutField] = {
+			type: 'integer'
+		}
+		result[options.subfields.minWorkedField] = {
+			type: 'integer'
+		}
+		result[options.subfields.dateField] = {
+			type: 'integer'
+		}
 
 		result[options.settingsField] = {
 			type: 'compound',
-			list: true,
-			fields: {}
+			list: true
+			// fields: {'name', 'in', 'timer', 'duration'}
 		}
-		result[options.settingsField.fields.nameField] = {type: 'choice', choices: 'Users'}
-		result[options.settingsField.fields.inField] = {type: 'integer'}
-		result[options.settingsField.fields.timerInputField] = {type: 'choice', choices: [true, false]}
-		result[options.settingsField.fields.durationInputField] = {type: 'choice', choices: [true, false]}
+		result[options.subfields.nameField] = {
+			type: 'choice',
+			choices: 'Users'
+		}
+		result[options.subfields.inField] = {
+			type: 'integer'
+		}
+		result[options.subfields.timerInputField] = {
+			type: 'choice',
+			choices: [true, false]
+		}
+		result[options.subfields.durationInputField] = {
+			type: 'choice',
+			choices: [true, false]
+		}
 
 		return result
 	}
