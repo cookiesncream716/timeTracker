@@ -32,51 +32,54 @@ registerPlugin(proto(Gem, function(){
 
 	// ticket fields
 	this.requireFields = function(options){
-		var result = {}
-		result[options.timesWorkedField] = {
+		var mainFields = {}
+		var timesWorkedSubfields = {}
+		var settingsSubfields = {}
+
+		mainFields[options.timesWorkedField] = {
 			type: 'compound',
-			list: true
-			// fields: {'user', 'checkIn', 'checkOut', 'minWorked', 'date'} - if this is here, it won't bundle
+			list: true,
+			fields: timesWorkedSubfields
 		}
-		result[options.subfields.userField] = {
+		timesWorkedSubfields[options.subfields.userField] = {
 			type: 'choice',
 			choices: 'Users'
 		}
-		result[options.subfields.checkInField] = {
+		timesWorkedSubfields[options.subfields.checkInField] = {
 			type: 'integer'
 		}
-		result[options.subfields.checkOutField] = {
+		timesWorkedSubfields[options.subfields.checkOutField] = {
 			type: 'integer'
 		}
-		result[options.subfields.minWorkedField] = {
+		timesWorkedSubfields[options.subfields.minWorkedField] = {
 			type: 'integer'
 		}
-		result[options.subfields.dateField] = {
+		timesWorkedSubfields[options.subfields.dateField] = {
 			type: 'integer'
 		}
 
-		result[options.settingsField] = {
+		mainFields[options.settingsField] = {
 			type: 'compound',
-			list: true
-			// fields: {'name', 'in', 'timer', 'duration'}
+			list: true,
+			fields: settingsSubfields
 		}
-		result[options.subfields.nameField] = {
+		settingsSubfields[options.subfields.nameField] = {
 			type: 'choice',
 			choices: 'Users'
 		}
-		result[options.subfields.inField] = {
+		settingsSubfields[options.subfields.inField] = {
 			type: 'integer'
 		}
-		result[options.subfields.timerInputField] = {
+		settingsSubfields[options.subfields.timerInputField] = {
 			type: 'choice',
 			choices: [true, false]
 		}
-		result[options.subfields.durationInputField] = {
+		settingsSubfields[options.subfields.durationInputField] = {
 			type: 'choice',
 			choices: [true, false]
 		}
 
-		return result
+		return mainFields, timesWorkedSubfields, settingsSubfields
 	}
 
 	this.build = function(ticket, optionsObservee, api){
